@@ -1,8 +1,12 @@
 import axios from 'axios';
 
 // Configure base URL for Django backend
-// const API_BASE_URL = 'http://localhost:8000/api/v2'; // Adjust this to match your Django server
-const API_BASE_URL = 'https://dev.shambabora.co.tz/api/v2';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://dev.shambabora.co.tz/api/v2';
+
+// Warn in development if using fallback URL
+if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_API_BASE_URL) {
+  console.warn('⚠️ REACT_APP_API_BASE_URL not set, using fallback URL:', API_BASE_URL);
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
