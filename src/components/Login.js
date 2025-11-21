@@ -25,7 +25,7 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/v2/auth/login/', {
+      const response = await fetch('https://dev.shambabora.co.tz/api/v2/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ function Login({ onLogin }) {
 
   return (
     <div className="login-container">
-      <motion.div 
+      <motion.div
         className="login-card"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -79,7 +79,7 @@ function Login({ onLogin }) {
         </div>
 
         {error && (
-          <motion.div 
+          <motion.div
             className="error-message"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}

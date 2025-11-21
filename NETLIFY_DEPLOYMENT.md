@@ -18,7 +18,11 @@ This guide will help you deploy the MeatTrace frontend to Netlify.
 4. Authorize Netlify to access your repositories
 5. Select the `meattrace_frontend` repository
 
-### 2. Configure Build Settings
+### 2. Set Base Directory
+
+In Netlify's site settings, set the **Base directory** to `meattrace_frontend`. This ensures the build process looks for `package.json` and `netlify.toml` in the correct subdirectory.
+
+### 3. Configure Build Settings
 
 Netlify should automatically detect the build settings from `netlify.toml`, but verify:
 
@@ -26,7 +30,7 @@ Netlify should automatically detect the build settings from `netlify.toml`, but 
 - **Publish directory**: `build`
 - **Node version**: 18
 
-### 3. Set Environment Variables
+### 4. Set Environment Variables
 
 Before deploying, you **must** configure the environment variable:
 
@@ -37,7 +41,7 @@ Before deploying, you **must** configure the environment variable:
    - **Value**: Your backend API URL (e.g., `https://dev.shambabora.co.tz/api/v2` or your production URL)
    - **Scopes**: Select all scopes (Production, Deploy Previews, Branch deploys)
 
-### 4. Deploy
+### 5. Deploy
 
 1. Click **"Deploy site"**
 2. Netlify will build and deploy your application
