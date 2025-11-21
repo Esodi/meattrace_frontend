@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { getDashboardStats } from '../services/api';
-import SimpleBarChart from './SimpleBarChart';
 import { motion } from 'framer-motion';
 import { 
   MdPeople, 
