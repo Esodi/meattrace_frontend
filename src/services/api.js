@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // Configure base URL for Django backend
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://dev.shambabora.co.tz/api/v2';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Warn in development if using fallback URL
-if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_API_BASE_URL) {
-  console.warn('⚠️ REACT_APP_API_BASE_URL not set, using fallback URL:', API_BASE_URL);
+if (!API_BASE_URL) {
+  console.error('❌ REACT_APP_API_BASE_URL not set. Please create a .env file with this variable.');
 }
 
 const api = axios.create({
@@ -89,6 +89,7 @@ export const updateShop = (shopId, shopData) => api.put(`/admin/shops/${shopId}/
 export const deleteShop = (shopId) => api.delete(`/admin/shops/${shopId}/`);
 
 // Analytics APIs
-export const getAnalytics = () => api.get('/admin/analytics/');
+export const getAnalytics = (period = '30d') => api.get(`/admin/analytics/overview/?period=${period}`);
+export const getDailyStats = (days = 30) => api.get(`/admin/analytics/daily_stats/?days=${days}`);
 
 export default api;
