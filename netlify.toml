@@ -9,7 +9,7 @@
   
   # Node version to use
   [build.environment]
-    NODE_VERSION = "16"
+    NODE_VERSION = "20"
 
 # Redirect rules for Single Page Application (SPA)
 # This ensures all routes are handled by React Router
