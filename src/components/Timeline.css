@@ -1,0 +1,160 @@
+.timeline-container {
+    padding: 1rem 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 30px;
+}
+
+.timeline-icon {
+    font-size: 1.5rem;
+    z-index: 2;
+    background: white;
+    border-radius: 50%;
+}
+
+.timeline-icon.success {
+    color: #10b981;
+}
+
+.timeline-icon.danger {
+    color: #ef4444;
+}
+
+.timeline-icon.warning {
+    color: #f59e0b;
+}
+
+.timeline-icon.info {
+    color: #3b82f6;
+}
+
+.timeline-line {
+    flex: 1;
+    width: 2px;
+    background-color: #e2e8f0;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.timeline-content {
+    flex: 1;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-date {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.timeline-status {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.timeline-status.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.timeline-status.status-failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.timeline-status.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.timeline-status.status-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.timeline-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+}
+
+.timeline-description {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .timeline-icon {
+        background: #1e293b;
+    }
+
+    .timeline-content {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .timeline-title {
+        color: #f1f5f9;
+    }
+
+    .timeline-date,
+    .timeline-description {
+        color: #94a3b8;
+    }
+
+    .timeline-line {
+        background-color: #334155;
+    }
+
+    .timeline-status.status-completed {
+        background: #064e3b;
+        color: #d1fae5;
+    }
+
+    .timeline-status.status-failed {
+        background: #7f1d1d;
+        color: #fee2e2;
+    }
+
+    .timeline-status.status-pending {
+        background: #78350f;
+        color: #fef3c7;
+    }
+
+    .timeline-status.status-info {
+        background: #1e3a8a;
+        color: #dbeafe;
+    }
+}

@@ -14,12 +14,14 @@ import './Analytics.css';
 // API imports
 import { getAnalytics } from '../services/api';
 
+import { AnalyticsData, DailyStat } from '../types';
+
 function Analytics() {
-  const [period, setPeriod] = useState('30d');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [dailyStats, setDailyStats] = useState([]);
+  const [period, setPeriod] = useState<string>('30d');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
 
   useEffect(() => {
     loadAnalytics();
@@ -50,8 +52,8 @@ function Analytics() {
   };
 
   // Generate mock daily stats (replace with actual API call later)
-  const generateMockDailyStats = (days) => {
-    const stats = [];
+  const generateMockDailyStats = (days: number): DailyStat[] => {
+    const stats: DailyStat[] = [];
     const today = new Date();
 
     for (let i = days - 1; i >= 0; i--) {
@@ -151,7 +153,7 @@ function Analytics() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: 'spring', stiffness: 100 }
+      transition: { type: 'spring' as const, stiffness: 100 }
     }
   };
 

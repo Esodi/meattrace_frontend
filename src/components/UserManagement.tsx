@@ -3,18 +3,23 @@ import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdAdd, MdEdit, MdDelete, MdClose, MdSave } from 'react-icons/md';
 
+import { User } from '../types';
+
 function UserManagement() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    password: '',
     first_name: '',
     last_name: '',
-    role: 'farmer'
+    role: 'Farmer',
+    phone: '',
+    address: ''
   });
 
   useEffect(() => {
@@ -36,35 +41,49 @@ function UserManagement() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, formData);
+        // For update, only send password if it's set
+        const updateData = { ...formData };
+        if (!updateData.password) {
+          delete (updateData as any).password;
+        }
+        await updateUser(editingUser.id, updateData);
       } else {
+        // For create, password is required
+        if (!formData.password) {
+          setError('Password is required for new users');
+          return;
+        }
         await createUser(formData);
       }
       await loadUsers();
       resetForm();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving user:', err);
-      setError('Failed to save user');
+      const errorMsg = err.response?.data?.detail || err.response?.data?.error || 'Failed to save user';
+      setError(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
     }
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = (user: User) => {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      email: user.email,
+      email: user.email || '',
+      password: '', // Don't populate password for editing
       first_name: user.first_name || '',
       last_name: user.last_name || '',
-      role: user.profile_role || user.role || 'farmer'
+      role: user.profile_role || user.role || 'Farmer',
+      phone: (user as any).profile_phone || '',
+      address: (user as any).profile_address || ''
     });
     setShowForm(true);
   };
 
-  const handleDelete = async (userId) => {
+  const handleDelete = async (userId: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await deleteUser(userId);
@@ -80,15 +99,19 @@ function UserManagement() {
     setFormData({
       username: '',
       email: '',
+      password: '',
       first_name: '',
       last_name: '',
-      role: 'farmer'
+      role: 'Farmer',
+      phone: '',
+      address: ''
     });
     setEditingUser(null);
     setShowForm(false);
+    setError(null);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -112,14 +135,14 @@ function UserManagement() {
 
   return (
     <div className="user-management">
-      <motion.div 
+      <motion.div
         className="header"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         <h1>User Management</h1>
-        <motion.button 
-          className="btn btn-primary" 
+        <motion.button
+          className="btn btn-primary"
           onClick={() => setShowForm(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -129,7 +152,7 @@ function UserManagement() {
       </motion.div>
 
       {error && (
-        <motion.div 
+        <motion.div
           className="error-message"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -140,12 +163,12 @@ function UserManagement() {
 
       <AnimatePresence>
         {showForm && (
-          <motion.div 
+          <motion.div
             className="card"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 20 }}
+            transition={{ type: 'spring' as const, damping: 20 }}
           >
             <h2>{editingUser ? 'Edit User' : 'Add New User'}</h2>
             <form onSubmit={handleSubmit}>
@@ -173,13 +196,39 @@ function UserManagement() {
               </div>
               <div className="form-row">
                 <div className="form-group">
+                  <label>Password:{!editingUser && <span style={{ color: '#dc2626' }}>*</span>}</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder={editingUser ? 'Leave blank to keep current' : 'Enter password'}
+                    required={!editingUser}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Role:</label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="Farmer">Farmer</option>
+                    <option value="Processor">Processor</option>
+                    <option value="ShopOwner">Shop Owner</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
                   <label>First Name:</label>
                   <input
                     type="text"
                     name="first_name"
                     value={formData.first_name}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
                 <div className="form-group">
@@ -189,36 +238,48 @@ function UserManagement() {
                     name="last_name"
                     value={formData.last_name}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label>Role:</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="farmer">Farmer</option>
-                  <option value="processor">Processor</option>
-                  <option value="shop_owner">Shop Owner</option>
-                  <option value="admin">Admin</option>
-                </select>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Phone:</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+255..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>
+                    Location/Address:
+                    <span style={{ fontSize: '11px', color: '#666', marginLeft: '4px' }}>
+                      (for map display)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Morogoro, Tanzania"
+                  />
+                </div>
               </div>
               <div className="form-actions">
-                <motion.button 
-                  type="submit" 
+                <motion.button
+                  type="submit"
                   className="btn btn-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <MdSave /> {editingUser ? 'Update User' : 'Create User'}
                 </motion.button>
-                <motion.button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <motion.button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={resetForm}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -231,7 +292,7 @@ function UserManagement() {
         )}
       </AnimatePresence>
 
-      <motion.div 
+      <motion.div
         className="card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -251,7 +312,7 @@ function UserManagement() {
             </thead>
             <tbody>
               {users.map((user, index) => (
-                <motion.tr 
+                <motion.tr
                   key={user.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -266,16 +327,16 @@ function UserManagement() {
                     </span>
                   </td>
                   <td>
-                    <motion.button 
-                      className="btn btn-secondary" 
+                    <motion.button
+                      className="btn btn-secondary"
                       onClick={() => handleEdit(user)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <MdEdit /> Edit
                     </motion.button>
-                    <motion.button 
-                      className="btn btn-danger" 
+                    <motion.button
+                      className="btn btn-danger"
                       onClick={() => handleDelete(user.id)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}

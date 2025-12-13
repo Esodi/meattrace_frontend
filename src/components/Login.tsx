@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import { MdLogin, MdPerson, MdLock } from 'react-icons/md';
 import './Login.css';
 
-function Login({ onLogin }) {
+import { LoginProps, LoginResponse } from '../types';
+
+function Login({ onLogin }: LoginProps) {
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
@@ -11,7 +13,7 @@ function Login({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({
       ...credentials,
       [e.target.name]: e.target.value
@@ -19,13 +21,13 @@ function Login({ onLogin }) {
     setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: 'POST',
         headers: {
@@ -34,20 +36,25 @@ function Login({ onLogin }) {
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
+      const data: LoginResponse = await response.json();
 
       if (response.ok) {
         // Store token in localStorage (support both legacy and nested 'tokens' response)
         const access = (data.tokens && data.tokens.access) || data.access;
         const refresh = (data.tokens && data.tokens.refresh) || data.refresh;
-        const user = data.user || data.user_data || null;
+        const user = data.user || data.user_data;
 
         if (access) localStorage.setItem('authToken', access);
         if (refresh) localStorage.setItem('refreshToken', refresh);
         if (user) localStorage.setItem('user', JSON.stringify(user));
 
-        // Call parent callback with normalized payload
-        onLogin({ tokens: { access, refresh }, user });
+        if (access && refresh && user) {
+          // Call parent callback with normalized payload
+          onLogin({ tokens: { access, refresh }, user });
+        } else {
+          setError('Incomplete login data received');
+        }
+
       } else {
         setError(data.detail || 'Invalid credentials. Please try again.');
       }

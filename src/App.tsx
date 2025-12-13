@@ -8,18 +8,27 @@ import Dashboard from './components/Dashboard';
 import UserManagement from './components/UserManagement';
 import ProcessingUnits from './components/ProcessingUnits';
 import Shops from './components/Shops';
+import AdminAnimals from './components/AdminAnimals';
+import AdminProducts from './components/AdminProducts';
+import ComplianceManagement from './components/ComplianceManagement';
+import Certifications from './components/Certifications';
+import SupplyChainMonitor from './components/SupplyChainMonitor';
+import ApprovalWorkflows from './components/ApprovalWorkflows';
+import GovernmentReports from './components/GovernmentReports';
 import Navigation from './components/Navigation';
 
+import { User } from './types';
+
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
-    
+
     if (token && storedUser) {
       setIsAuthenticated(true);
       setUser(JSON.parse(storedUser));
@@ -27,7 +36,7 @@ function App() {
     setLoading(false);
   }, []);
 
-  const handleLogin = (data) => {
+  const handleLogin = (data: { user: User }) => {
     setIsAuthenticated(true);
     setUser(data.user);
   };
@@ -62,6 +71,13 @@ function App() {
             <Route path="/users" element={<UserManagement />} />
             <Route path="/processing-units" element={<ProcessingUnits />} />
             <Route path="/shops" element={<Shops />} />
+            <Route path="/animals" element={<AdminAnimals />} />
+            <Route path="/products" element={<AdminProducts />} />
+            <Route path="/compliance" element={<ComplianceManagement />} />
+            <Route path="/certifications" element={<Certifications />} />
+            <Route path="/supply-chain" element={<SupplyChainMonitor />} />
+            <Route path="/approvals" element={<ApprovalWorkflows />} />
+            <Route path="/reports" element={<GovernmentReports />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

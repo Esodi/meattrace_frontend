@@ -20,8 +20,10 @@ import {
 import './Dashboard.css';
 import './Analytics.css';
 
+import { DashboardStats, AnalyticsData, DailyStat } from '../types';
+
 function Dashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     total_users: 0,
     total_processing_units: 0,
     total_shops: 0,
@@ -30,11 +32,11 @@ function Dashboard() {
     total_sales: 0,
     total_orders: 0
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [period, setPeriod] = useState('30d');
-  const [analyticsData, setAnalyticsData] = useState(null);
-  const [dailyStats, setDailyStats] = useState([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<string>('30d');
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
 
   useEffect(() => {
     loadDashboardStats();
@@ -63,6 +65,7 @@ function Dashboard() {
     try {
       // Fetch analytics overview
       const response = await getAnalytics(period);
+      console.log('[Dashboard] Analytics response:', response.data);
 
       if (response.data) {
         setAnalyticsData(response.data);
@@ -71,10 +74,11 @@ function Dashboard() {
       // Fetch daily stats for charts
       const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
       const dailyResponse = await getDailyStats(days);
+      console.log('[Dashboard] Daily stats response:', dailyResponse.data);
 
       if (dailyResponse.data && dailyResponse.data.daily_stats) {
         // Transform backend data to chart format
-        const transformedStats = dailyResponse.data.daily_stats.map(stat => ({
+        const transformedStats = dailyResponse.data.daily_stats.map((stat: DailyStat) => ({
           date: stat.date.slice(5), // Get MM-DD from YYYY-MM-DD
           users: stat.new_users || 0,
           animals: stat.new_animals || 0,
@@ -84,22 +88,20 @@ function Dashboard() {
         }));
         setDailyStats(transformedStats);
       } else {
-        // Fallback to mock data if API doesn't return expected format
-        const mockStats = generateMockDailyStats(days);
-        setDailyStats(mockStats);
+        console.warn('[Dashboard] No daily_stats in response, using empty array');
+        setDailyStats([]);
       }
-    } catch (err) {
-      console.error('Error loading analytics:', err);
-      // Use mock data as fallback
-      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-      const mockStats = generateMockDailyStats(days);
-      setDailyStats(mockStats);
+    } catch (err: any) {
+      console.error('[Dashboard] Error loading analytics:', err);
+      console.error('[Dashboard] Error details:', err.response?.data || err.message);
+      // Don't set mock data - show what we have or empty
+      setError('Failed to load analytics data. Check console for details.');
     }
   };
 
   // Generate mock daily stats (fallback when API fails)
-  const generateMockDailyStats = (days) => {
-    const stats = [];
+  const generateMockDailyStats = (days: number): DailyStat[] => {
+    const stats: DailyStat[] = [];
     const today = new Date();
 
     for (let i = days - 1; i >= 0; i--) {
@@ -174,7 +176,7 @@ function Dashboard() {
       y: 0,
       opacity: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 100
       }
     }

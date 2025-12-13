@@ -2,7 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './SimpleBarChart.css';
 
-function SimpleBarChart({ data, maxHeight = 250 }) {
+import { SimpleBarChartProps } from '../types';
+
+function SimpleBarChart({ data, maxHeight = 250 }: SimpleBarChartProps) {
   const maxValue = Math.max(...data.map(item => item.value));
 
   const colors = [
@@ -25,13 +27,13 @@ function SimpleBarChart({ data, maxHeight = 250 }) {
               className="bar-item"
               initial={{ height: 0 }}
               animate={{ height: `${heightPercent}%` }}
-              transition={{ 
-                duration: 0.8, 
+              transition={{
+                duration: 0.8,
                 delay: index * 0.1,
                 type: 'spring',
                 stiffness: 100
               }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
                 transition: { duration: 0.2 }
               }}
@@ -39,7 +41,7 @@ function SimpleBarChart({ data, maxHeight = 250 }) {
                 background: colors[index % colors.length]
               }}
             >
-              <motion.div 
+              <motion.div
                 className="bar-value"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -47,7 +49,7 @@ function SimpleBarChart({ data, maxHeight = 250 }) {
               >
                 {item.value}
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="bar-label"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
