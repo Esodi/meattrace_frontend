@@ -1,36 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdSearch, MdFilterList, MdPets, MdVisibility, MdRefresh, MdAdd, MdClose, MdEdit, MdDelete } from 'react-icons/md';
-import { createAnimal, deleteAnimal, getFarmers, getProcessingUnits } from '../services/api';
-import api from '../services/api';
+import { MdSearch, MdFilterList, MdRefresh, MdAdd, MdClose, MdDelete, MdVisibility, MdContentCut } from 'react-icons/md';
+import { getSlaughterParts, createSlaughterPart, deleteSlaughterPart, getAnimals, getProcessingUnits } from '../services/api';
+
+interface SlaughterPart {
+    id: number;
+    part_id: string;
+    part_type: string;
+    weight: number;
+    remaining_weight: number;
+    weight_unit: string;
+    description: string;
+    used_in_product: boolean;
+    animal: number;
+    animal_id?: string;
+    animal_species?: string;
+    transferred_to: number | null;
+    processing_unit_name: string | null;
+    created_at: string;
+    transferred_at: string | null;
+}
 
 interface Animal {
     id: number;
     animal_id: string;
     animal_name: string;
     species: string;
-    age: number;
-    live_weight: number;
-    farmer_name: string;
-    processing_unit_name: string | null;
     slaughtered: boolean;
-    slaughtered_at: string | null;
-    transferred_at: string | null;
-    lifecycle_status: string;
-    has_rejections: boolean;
-    has_appeals: boolean;
-    created_at: string;
-}
-
-interface Farmer {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    full_name: string;
-    location: string;
-    animal_count: number;
 }
 
 interface ProcessingUnit {
@@ -39,38 +35,41 @@ interface ProcessingUnit {
     location: string;
 }
 
-interface AnimalFormData {
-    farmer_id: number | '';
-    species: string;
-    animal_name: string;
-    age: number | '';
-    gender: string;
-    live_weight: number | '';
-    notes: string;
+interface PartFormData {
+    animal_id: number | '';
+    part_type: string;
+    weight: number | '';
+    weight_unit: string;
+    description: string;
     processing_unit_id: number | '' | null;
-    slaughtered: boolean;
 }
 
-const SPECIES_OPTIONS = [
-    { value: 'cow', label: 'Cow' },
-    { value: 'pig', label: 'Pig' },
-    { value: 'chicken', label: 'Chicken' },
-    { value: 'sheep', label: 'Sheep' },
-    { value: 'goat', label: 'Goat' },
+const PART_TYPE_OPTIONS = [
+    { value: 'whole_carcass', label: 'Whole Carcass' },
+    { value: 'left_side', label: 'Left Side' },
+    { value: 'right_side', label: 'Right Side' },
+    { value: 'left_carcass', label: 'Left Carcass' },
+    { value: 'right_carcass', label: 'Right Carcass' },
+    { value: 'head', label: 'Head' },
+    { value: 'feet', label: 'Feet' },
+    { value: 'internal_organs', label: 'Internal Organs' },
+    { value: 'torso', label: 'Torso' },
+    { value: 'front_legs', label: 'Front Legs' },
+    { value: 'hind_legs', label: 'Hind Legs' },
 ];
 
-const GENDER_OPTIONS = [
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'unknown', label: 'Unknown' },
+const WEIGHT_UNIT_OPTIONS = [
+    { value: 'kg', label: 'Kilograms' },
+    { value: 'lbs', label: 'Pounds' },
+    { value: 'g', label: 'Grams' },
 ];
 
-function AdminAnimals() {
-    const [animals, setAnimals] = useState<Animal[]>([]);
+function AdminSlaughterParts() {
+    const [parts, setParts] = useState<SlaughterPart[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('');
+    const [typeFilter, setTypeFilter] = useState<string>('');
     const [showFilters, setShowFilters] = useState(false);
 
     // Modal state
@@ -79,45 +78,34 @@ function AdminAnimals() {
     const [formError, setFormError] = useState<string | null>(null);
 
     // Dropdown data
-    const [farmers, setFarmers] = useState<Farmer[]>([]);
+    const [animals, setAnimals] = useState<Animal[]>([]);
     const [processingUnits, setProcessingUnits] = useState<ProcessingUnit[]>([]);
     const [loadingDropdowns, setLoadingDropdowns] = useState(false);
 
     // Form data
-    const [formData, setFormData] = useState<AnimalFormData>({
-        farmer_id: '',
-        species: 'cow',
-        animal_name: '',
-        age: '',
-        gender: 'unknown',
-        live_weight: '',
-        notes: '',
+    const [formData, setFormData] = useState<PartFormData>({
+        animal_id: '',
+        part_type: 'whole_carcass',
+        weight: '',
+        weight_unit: 'kg',
+        description: '',
         processing_unit_id: null,
-        slaughtered: false,
     });
 
     useEffect(() => {
-        loadAnimals();
-    }, [statusFilter]);
+        loadParts();
+    }, [typeFilter]);
 
-    const loadAnimals = async () => {
+    const loadParts = async () => {
         try {
             setLoading(true);
             setError(null);
-            let url = '/admin/animals/';
-            const params = new URLSearchParams();
-            if (statusFilter) {
-                params.append('lifecycle_status', statusFilter);
-            }
-            if (params.toString()) {
-                url += `?${params.toString()}`;
-            }
-            const response = await api.get(url);
-            setAnimals(response.data.results || response.data || []);
+            const response = await getSlaughterParts();
+            setParts(response.data.results || response.data || []);
         } catch (err: any) {
-            console.error('Error loading animals:', err);
-            setError('Failed to load animals. Please ensure you are authenticated.');
-            setAnimals([]);
+            console.error('Error loading slaughter parts:', err);
+            setError('Failed to load slaughter parts. Please ensure you are authenticated.');
+            setParts([]);
         } finally {
             setLoading(false);
         }
@@ -126,11 +114,13 @@ function AdminAnimals() {
     const loadDropdownData = async () => {
         setLoadingDropdowns(true);
         try {
-            const [farmersRes, puRes] = await Promise.all([
-                getFarmers(),
+            const [animalsRes, puRes] = await Promise.all([
+                getAnimals({ lifecycle_status: 'SLAUGHTERED' }),
                 getProcessingUnits()
             ]);
-            setFarmers(farmersRes.data.results || farmersRes.data || []);
+            // Filter to only slaughtered animals
+            const allAnimals = animalsRes.data.results || animalsRes.data || [];
+            setAnimals(allAnimals.filter((a: Animal) => a.slaughtered));
             setProcessingUnits(puRes.data.results || puRes.data || []);
         } catch (err) {
             console.error('Error loading dropdown data:', err);
@@ -141,15 +131,12 @@ function AdminAnimals() {
 
     const handleOpenAddModal = () => {
         setFormData({
-            farmer_id: '',
-            species: 'cow',
-            animal_name: '',
-            age: '',
-            gender: 'unknown',
-            live_weight: '',
-            notes: '',
+            animal_id: '',
+            part_type: 'whole_carcass',
+            weight: '',
+            weight_unit: 'kg',
+            description: '',
             processing_unit_id: null,
-            slaughtered: false,
         });
         setFormError(null);
         loadDropdownData();
@@ -164,10 +151,7 @@ function AdminAnimals() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
 
-        if (type === 'checkbox') {
-            const checked = (e.target as HTMLInputElement).checked;
-            setFormData(prev => ({ ...prev, [name]: checked }));
-        } else if (type === 'number') {
+        if (type === 'number') {
             setFormData(prev => ({ ...prev, [name]: value === '' ? '' : parseFloat(value) }));
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
@@ -179,12 +163,12 @@ function AdminAnimals() {
         setFormError(null);
 
         // Validation
-        if (!formData.farmer_id) {
-            setFormError('Please select a farmer.');
+        if (!formData.animal_id) {
+            setFormError('Please select an animal.');
             return;
         }
-        if (!formData.age || formData.age <= 0) {
-            setFormError('Please enter a valid age.');
+        if (!formData.weight || formData.weight <= 0) {
+            setFormError('Please enter a valid weight.');
             return;
         }
 
@@ -192,35 +176,35 @@ function AdminAnimals() {
         try {
             const payload = {
                 ...formData,
-                farmer_id: Number(formData.farmer_id),
+                animal_id: Number(formData.animal_id),
                 processing_unit_id: formData.processing_unit_id ? Number(formData.processing_unit_id) : null,
             };
 
-            await createAnimal(payload);
+            await createSlaughterPart(payload);
             setShowAddModal(false);
-            loadAnimals();
+            loadParts();
         } catch (err: any) {
-            console.error('Error creating animal:', err);
+            console.error('Error creating slaughter part:', err);
             const errorMsg = err.response?.data?.detail ||
                 err.response?.data?.message ||
                 Object.values(err.response?.data || {}).flat().join(', ') ||
-                'Failed to create animal.';
+                'Failed to create slaughter part.';
             setFormError(errorMsg);
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleDeleteAnimal = async (id: number, animalId: string) => {
-        if (!window.confirm(`Are you sure you want to delete animal ${animalId}?`)) {
+    const handleDeletePart = async (id: number, partId: string) => {
+        if (!window.confirm(`Are you sure you want to delete part ${partId}?`)) {
             return;
         }
         try {
-            await deleteAnimal(id);
-            loadAnimals();
+            await deleteSlaughterPart(id);
+            loadParts();
         } catch (err: any) {
-            console.error('Error deleting animal:', err);
-            setError('Failed to delete animal.');
+            console.error('Error deleting slaughter part:', err);
+            setError('Failed to delete slaughter part.');
         }
     };
 
@@ -233,22 +217,24 @@ function AdminAnimals() {
         });
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status?.toUpperCase()) {
-            case 'HEALTHY': return { bg: '#dcfce7', color: '#166534' };
-            case 'SLAUGHTERED': return { bg: '#fee2e2', color: '#991b1b' };
-            case 'TRANSFERRED': return { bg: '#dbeafe', color: '#1e40af' };
-            case 'SEMI-TRANSFERRED': return { bg: '#fef3c7', color: '#92400e' };
-            default: return { bg: '#f3f4f6', color: '#374151' };
-        }
+    const getPartTypeLabel = (type: string) => {
+        const option = PART_TYPE_OPTIONS.find(opt => opt.value === type);
+        return option ? option.label : type;
     };
 
-    const filteredAnimals = animals.filter(animal =>
-        animal.animal_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        animal.animal_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        animal.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        animal.species?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Get unique part types for filter
+    const partTypes = [...new Set(parts.map(p => p.part_type).filter(Boolean))];
+
+    const filteredParts = parts.filter(part => {
+        const matchesSearch =
+            part.part_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            part.animal_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            part.part_type?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesFilter = !typeFilter || part.part_type === typeFilter;
+
+        return matchesSearch && matchesFilter;
+    });
 
     if (loading) {
         return (
@@ -258,9 +244,9 @@ function AdminAnimals() {
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     style={{ display: 'inline-block', fontSize: '3rem' }}
                 >
-                    🐄
+                    🥩
                 </motion.div>
-                <p>Loading animals...</p>
+                <p>Loading slaughter parts...</p>
             </div>
         );
     }
@@ -272,7 +258,7 @@ function AdminAnimals() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <h1><MdPets style={{ verticalAlign: 'middle', marginRight: '8px' }} />Animal Traceability</h1>
+                <h1><MdContentCut style={{ verticalAlign: 'middle', marginRight: '8px' }} />Slaughter Parts</h1>
                 <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div className="search-bar" style={{
                         display: 'flex',
@@ -285,7 +271,7 @@ function AdminAnimals() {
                         <MdSearch />
                         <input
                             type="text"
-                            placeholder="Search ID, name, farmer..."
+                            placeholder="Search part ID, animal..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
@@ -303,7 +289,7 @@ function AdminAnimals() {
                         whileTap={{ scale: 0.95 }}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        <MdAdd /> Add Animal
+                        <MdAdd /> Add Part
                     </motion.button>
                     <motion.button
                         className="btn btn-secondary"
@@ -315,7 +301,7 @@ function AdminAnimals() {
                     </motion.button>
                     <motion.button
                         className="btn btn-secondary"
-                        onClick={loadAnimals}
+                        onClick={loadParts}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
@@ -335,21 +321,34 @@ function AdminAnimals() {
                         style={{ marginBottom: '16px', overflow: 'hidden' }}
                     >
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <label style={{ fontWeight: 500 }}>Status:</label>
-                            {['', 'HEALTHY', 'SLAUGHTERED', 'TRANSFERRED', 'SEMI-TRANSFERRED'].map((status) => (
+                            <label style={{ fontWeight: 500 }}>Part Type:</label>
+                            <button
+                                onClick={() => setTypeFilter('')}
+                                style={{
+                                    padding: '6px 14px',
+                                    borderRadius: '20px',
+                                    border: typeFilter === '' ? '2px solid #6366f1' : '1px solid #e5e7eb',
+                                    background: typeFilter === '' ? '#eef2ff' : 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: typeFilter === '' ? 600 : 400
+                                }}
+                            >
+                                All
+                            </button>
+                            {partTypes.map((type) => (
                                 <button
-                                    key={status || 'all'}
-                                    onClick={() => setStatusFilter(status)}
+                                    key={type}
+                                    onClick={() => setTypeFilter(type)}
                                     style={{
                                         padding: '6px 14px',
                                         borderRadius: '20px',
-                                        border: statusFilter === status ? '2px solid #6366f1' : '1px solid #e5e7eb',
-                                        background: statusFilter === status ? '#eef2ff' : 'white',
+                                        border: typeFilter === type ? '2px solid #6366f1' : '1px solid #e5e7eb',
+                                        background: typeFilter === type ? '#eef2ff' : 'white',
                                         cursor: 'pointer',
-                                        fontWeight: statusFilter === status ? 600 : 400
+                                        fontWeight: typeFilter === type ? 600 : 400
                                     }}
                                 >
-                                    {status || 'All'}
+                                    {getPartTypeLabel(type)}
                                 </button>
                             ))}
                         </div>
@@ -386,10 +385,10 @@ function AdminAnimals() {
                 }}
             >
                 {[
-                    { label: 'Total Animals', count: animals.length, color: '#6366f1' },
-                    { label: 'Healthy', count: animals.filter(a => a.lifecycle_status === 'HEALTHY').length, color: '#10b981' },
-                    { label: 'Slaughtered', count: animals.filter(a => a.lifecycle_status === 'SLAUGHTERED').length, color: '#ef4444' },
-                    { label: 'Transferred', count: animals.filter(a => a.lifecycle_status === 'TRANSFERRED').length, color: '#3b82f6' }
+                    { label: 'Total Parts', count: parts.length, color: '#6366f1' },
+                    { label: 'Available', count: parts.filter(p => !p.used_in_product).length, color: '#10b981' },
+                    { label: 'Used in Products', count: parts.filter(p => p.used_in_product).length, color: '#f59e0b' },
+                    { label: 'Transferred', count: parts.filter(p => p.transferred_to !== null).length, color: '#3b82f6' }
                 ].map((stat) => (
                     <div
                         key={stat.label}
@@ -414,67 +413,65 @@ function AdminAnimals() {
                 transition={{ delay: 0.1 }}
             >
                 <h2 style={{ marginBottom: '16px' }}>
-                    Animals List
+                    Parts List
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>
-                        ({filteredAnimals.length} {filteredAnimals.length === 1 ? 'animal' : 'animals'})
+                        ({filteredParts.length} {filteredParts.length === 1 ? 'part' : 'parts'})
                     </span>
                 </h2>
                 <div className="table-container">
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>Animal ID</th>
-                                <th>Name</th>
-                                <th>Species</th>
+                                <th>Part ID</th>
+                                <th>Type</th>
+                                <th>Animal</th>
+                                <th>Weight</th>
+                                <th>Remaining</th>
                                 <th>Status</th>
-                                <th>Farmer</th>
                                 <th>Location</th>
-                                <th>Registered</th>
+                                <th>Created</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredAnimals.length === 0 ? (
+                            {filteredParts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-                                        {searchTerm ? 'No animals match your search' : 'No animals found'}
+                                    <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                                        {searchTerm ? 'No parts match your search' : 'No slaughter parts found'}
                                     </td>
                                 </tr>
                             ) : (
-                                filteredAnimals.map((animal, index) => {
-                                    const statusStyle = getStatusColor(animal.lifecycle_status);
+                                filteredParts.map((part, index) => {
+                                    const isUsed = part.used_in_product;
                                     return (
                                         <motion.tr
-                                            key={animal.id}
+                                            key={part.id}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: index * 0.03 }}
-                                            style={{ cursor: 'pointer' }}
                                         >
-                                            <td style={{ fontWeight: 600, fontFamily: 'monospace' }}>{animal.animal_id}</td>
-                                            <td>{animal.animal_name || 'N/A'}</td>
-                                            <td style={{ textTransform: 'capitalize' }}>{animal.species}</td>
+                                            <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{part.part_id}</td>
+                                            <td>{getPartTypeLabel(part.part_type)}</td>
+                                            <td style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                                                {part.animal_id || `Animal #${part.animal}`}
+                                                {part.animal_species && <span style={{ color: '#6b7280' }}> ({part.animal_species})</span>}
+                                            </td>
+                                            <td>{part.weight} {part.weight_unit}</td>
+                                            <td>{part.remaining_weight} {part.weight_unit}</td>
                                             <td>
                                                 <span style={{
                                                     padding: '4px 10px',
                                                     borderRadius: '12px',
                                                     fontSize: '0.75rem',
                                                     fontWeight: 500,
-                                                    background: statusStyle.bg,
-                                                    color: statusStyle.color
+                                                    background: isUsed ? '#fef3c7' : '#dcfce7',
+                                                    color: isUsed ? '#92400e' : '#166534'
                                                 }}>
-                                                    {animal.lifecycle_status || 'Unknown'}
+                                                    {isUsed ? 'Used' : 'Available'}
                                                 </span>
-                                                {animal.has_rejections && (
-                                                    <span title="Has rejections" style={{ marginLeft: '4px' }}>⚠️</span>
-                                                )}
-                                                {animal.has_appeals && (
-                                                    <span title="Has appeals" style={{ marginLeft: '4px' }}>📝</span>
-                                                )}
                                             </td>
-                                            <td>{animal.farmer_name || 'N/A'}</td>
-                                            <td>{animal.processing_unit_name || 'At Farm'}</td>
-                                            <td>{formatDate(animal.created_at)}</td>
+                                            <td>{part.processing_unit_name || 'At Source'}</td>
+                                            <td>{formatDate(part.created_at)}</td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
                                                     <motion.button
@@ -489,7 +486,7 @@ function AdminAnimals() {
                                                         className="btn btn-sm btn-danger"
                                                         whileHover={{ scale: 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
-                                                        onClick={() => handleDeleteAnimal(animal.id, animal.animal_id)}
+                                                        onClick={() => handleDeletePart(part.id, part.part_id)}
                                                         title="Delete"
                                                         style={{ background: '#ef4444', color: 'white', border: 'none' }}
                                                     >
@@ -506,7 +503,7 @@ function AdminAnimals() {
                 </div>
             </motion.div>
 
-            {/* Add Animal Modal */}
+            {/* Add Part Modal */}
             <AnimatePresence>
                 {showAddModal && (
                     <motion.div
@@ -536,14 +533,14 @@ function AdminAnimals() {
                             onClick={(e) => e.stopPropagation()}
                             style={{
                                 width: '100%',
-                                maxWidth: '600px',
+                                maxWidth: '550px',
                                 maxHeight: '90vh',
                                 overflow: 'auto',
                                 padding: '24px'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>Add New Animal</h2>
+                                <h2 style={{ margin: 0 }}>Add Slaughter Part</h2>
                                 <button onClick={handleCloseModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>
                                     <MdClose />
                                 </button>
@@ -557,108 +554,85 @@ function AdminAnimals() {
 
                             <form onSubmit={handleSubmit}>
                                 <div style={{ display: 'grid', gap: '16px' }}>
-                                    {/* Farmer Selection */}
+                                    {/* Animal Selection */}
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
-                                            Farmer <span style={{ color: 'red' }}>*</span>
+                                            Slaughtered Animal <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
-                                            name="farmer_id"
-                                            value={formData.farmer_id}
+                                            name="animal_id"
+                                            value={formData.animal_id}
                                             onChange={handleInputChange}
                                             required
                                             disabled={loadingDropdowns}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                         >
-                                            <option value="">Select a farmer...</option>
-                                            {farmers.map(farmer => (
-                                                <option key={farmer.id} value={farmer.id}>
-                                                    {farmer.full_name} ({farmer.username}) - {farmer.animal_count} animals
+                                            <option value="">Select a slaughtered animal...</option>
+                                            {animals.length === 0 && !loadingDropdowns && (
+                                                <option value="" disabled>No slaughtered animals available</option>
+                                            )}
+                                            {animals.map(animal => (
+                                                <option key={animal.id} value={animal.id}>
+                                                    {animal.animal_id} - {animal.animal_name || animal.species}
                                                 </option>
+                                            ))}
+                                        </select>
+                                        {animals.length === 0 && !loadingDropdowns && (
+                                            <p style={{ fontSize: '0.75rem', color: '#991b1b', marginTop: '4px' }}>
+                                                No slaughtered animals found. Only slaughtered animals can have parts added.
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Part Type */}
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Part Type</label>
+                                        <select
+                                            name="part_type"
+                                            value={formData.part_type}
+                                            onChange={handleInputChange}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                                        >
+                                            {PART_TYPE_OPTIONS.map(opt => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
                                             ))}
                                         </select>
                                     </div>
 
-                                    {/* Species and Gender Row */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Species</label>
-                                            <select
-                                                name="species"
-                                                value={formData.species}
-                                                onChange={handleInputChange}
-                                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                                            >
-                                                {SPECIES_OPTIONS.map(opt => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Gender</label>
-                                            <select
-                                                name="gender"
-                                                value={formData.gender}
-                                                onChange={handleInputChange}
-                                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                                            >
-                                                {GENDER_OPTIONS.map(opt => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* Animal Name */}
+                                    {/* Weight */}
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Animal Name (Optional)</label>
-                                        <input
-                                            type="text"
-                                            name="animal_name"
-                                            value={formData.animal_name}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., Bessie, Tag #1234"
-                                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                                        />
-                                    </div>
-
-                                    {/* Age and Weight Row */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
-                                                Age (months) <span style={{ color: 'red' }}>*</span>
-                                            </label>
+                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+                                            Weight <span style={{ color: 'red' }}>*</span>
+                                        </label>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
                                             <input
                                                 type="number"
-                                                name="age"
-                                                value={formData.age}
+                                                name="weight"
+                                                value={formData.weight}
                                                 onChange={handleInputChange}
                                                 min="0"
                                                 step="0.1"
                                                 required
-                                                placeholder="e.g., 24"
-                                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                                                placeholder="e.g., 50"
+                                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                             />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Live Weight (kg)</label>
-                                            <input
-                                                type="number"
-                                                name="live_weight"
-                                                value={formData.live_weight}
+                                            <select
+                                                name="weight_unit"
+                                                value={formData.weight_unit}
                                                 onChange={handleInputChange}
-                                                min="0"
-                                                step="0.1"
-                                                placeholder="e.g., 450"
-                                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                                            />
+                                                style={{ width: '100px', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                                            >
+                                                {WEIGHT_UNIT_OPTIONS.map(opt => (
+                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
 
                                     {/* Processing Unit (Optional) */}
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
-                                            Processing Unit (if already transferred)
+                                            Transfer to Processing Unit (Optional)
                                         </label>
                                         <select
                                             name="processing_unit_id"
@@ -667,7 +641,7 @@ function AdminAnimals() {
                                             disabled={loadingDropdowns}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                         >
-                                            <option value="">At Farm (not transferred)</option>
+                                            <option value="">Keep at Source</option>
                                             {processingUnits.map(pu => (
                                                 <option key={pu.id} value={pu.id}>
                                                     {pu.name} - {pu.location}
@@ -676,27 +650,15 @@ function AdminAnimals() {
                                         </select>
                                     </div>
 
-                                    {/* Slaughtered Checkbox */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <input
-                                            type="checkbox"
-                                            name="slaughtered"
-                                            checked={formData.slaughtered}
-                                            onChange={handleInputChange}
-                                            id="slaughtered"
-                                        />
-                                        <label htmlFor="slaughtered" style={{ fontWeight: 500 }}>Already Slaughtered</label>
-                                    </div>
-
-                                    {/* Notes */}
+                                    {/* Description */}
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Notes</label>
+                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Description</label>
                                         <textarea
-                                            name="notes"
-                                            value={formData.notes}
+                                            name="description"
+                                            value={formData.description}
                                             onChange={handleInputChange}
                                             rows={3}
-                                            placeholder="Additional notes about the animal..."
+                                            placeholder="Additional notes about this part..."
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', resize: 'vertical' }}
                                         />
                                     </div>
@@ -715,10 +677,10 @@ function AdminAnimals() {
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
-                                        disabled={submitting}
+                                        disabled={submitting || animals.length === 0}
                                         style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
                                     >
-                                        {submitting ? 'Creating...' : <><MdAdd /> Create Animal</>}
+                                        {submitting ? 'Creating...' : <><MdAdd /> Create Part</>}
                                     </button>
                                 </div>
                             </form>
@@ -730,4 +692,4 @@ function AdminAnimals() {
     );
 }
 
-export default AdminAnimals;
+export default AdminSlaughterParts;

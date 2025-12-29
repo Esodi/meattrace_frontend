@@ -10,6 +10,7 @@ import ProcessingUnits from './components/ProcessingUnits';
 import Shops from './components/Shops';
 import AdminAnimals from './components/AdminAnimals';
 import AdminProducts from './components/AdminProducts';
+import AdminSlaughterParts from './components/AdminSlaughterParts';
 import ComplianceManagement from './components/ComplianceManagement';
 import Certifications from './components/Certifications';
 import SupplyChainMonitor from './components/SupplyChainMonitor';
@@ -73,6 +74,7 @@ function App() {
             <Route path="/shops" element={<Shops />} />
             <Route path="/animals" element={<AdminAnimals />} />
             <Route path="/products" element={<AdminProducts />} />
+            <Route path="/slaughter-parts" element={<AdminSlaughterParts />} />
             <Route path="/compliance" element={<ComplianceManagement />} />
             <Route path="/certifications" element={<Certifications />} />
             <Route path="/supply-chain" element={<SupplyChainMonitor />} />

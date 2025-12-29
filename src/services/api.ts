@@ -99,7 +99,7 @@ export const getSupplyChainStats = () => api.get('/admin/dashboard/supply_chain_
 // Map Locations for Supply Chain Map
 export const getMapLocations = () => api.get('/admin/dashboard/map_locations/');
 
-// Animal Traceability APIs
+// Animal Traceability APIs (Full CRUD)
 export const getAnimals = (params?: { lifecycle_status?: string }) => {
   const queryParams = new URLSearchParams();
   if (params?.lifecycle_status) queryParams.append('lifecycle_status', params.lifecycle_status);
@@ -107,8 +107,11 @@ export const getAnimals = (params?: { lifecycle_status?: string }) => {
   return api.get(`/admin/animals/${queryString ? `?${queryString}` : ''}`);
 };
 export const getAnimal = (id: number | string) => api.get(`/admin/animals/${id}/`);
+export const createAnimal = (data: any) => api.post('/admin/animals/', data);
+export const updateAnimal = (id: number | string, data: any) => api.put(`/admin/animals/${id}/`, data);
+export const deleteAnimal = (id: number | string) => api.delete(`/admin/animals/${id}/`);
 
-// Product Traceability APIs
+// Product Traceability APIs (Full CRUD)
 export const getProducts = (params?: { product_type?: string }) => {
   const queryParams = new URLSearchParams();
   if (params?.product_type) queryParams.append('product_type', params.product_type);
@@ -116,6 +119,24 @@ export const getProducts = (params?: { product_type?: string }) => {
   return api.get(`/admin/products/${queryString ? `?${queryString}` : ''}`);
 };
 export const getProduct = (id: number | string) => api.get(`/admin/products/${id}/`);
+export const createProduct = (data: any) => api.post('/admin/products/', data);
+export const updateProduct = (id: number | string, data: any) => api.put(`/admin/products/${id}/`, data);
+export const deleteProduct = (id: number | string) => api.delete(`/admin/products/${id}/`);
+
+// Slaughter Parts APIs (Full CRUD)
+export const getSlaughterParts = (params?: { animal_id?: number }) => {
+  const queryParams = new URLSearchParams();
+  if (params?.animal_id) queryParams.append('animal_id', params.animal_id.toString());
+  const queryString = queryParams.toString();
+  return api.get(`/admin/slaughter-parts/${queryString ? `?${queryString}` : ''}`);
+};
+export const getSlaughterPart = (id: number | string) => api.get(`/admin/slaughter-parts/${id}/`);
+export const createSlaughterPart = (data: any) => api.post('/admin/slaughter-parts/', data);
+export const updateSlaughterPart = (id: number | string, data: any) => api.put(`/admin/slaughter-parts/${id}/`, data);
+export const deleteSlaughterPart = (id: number | string) => api.delete(`/admin/slaughter-parts/${id}/`);
+
+// Farmers API (for selection dropdowns)
+export const getFarmers = () => api.get('/admin/farmers/');
 
 // Compliance & Certifications APIs
 export const getComplianceAudits = () => api.get('/admin/compliance/');
