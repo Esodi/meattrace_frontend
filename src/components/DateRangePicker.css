@@ -54,8 +54,8 @@
 }
 
 .date-input-group:focus-within {
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary-color, #b91c1c);
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
 }
 
 .date-icon {

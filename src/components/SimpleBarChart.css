@@ -9,7 +9,7 @@
   gap: 1rem;
   padding: 1rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.05), transparent);
+  background: linear-gradient(180deg, rgba(185, 28, 28, 0.05), transparent);
 }
 
 .bar-item {
