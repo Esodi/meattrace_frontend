@@ -280,7 +280,10 @@ function AdminAnimals() {
                         background: 'var(--bg-secondary, #f3f4f6)',
                         padding: '8px 12px',
                         borderRadius: '8px',
-                        gap: '8px'
+                        borderRadius: '8px',
+                        gap: '8px',
+                        flex: '1 1 auto',
+                        minWidth: '200px'
                     }}>
                         <MdSearch />
                         <input
@@ -292,7 +295,9 @@ function AdminAnimals() {
                                 border: 'none',
                                 background: 'transparent',
                                 outline: 'none',
-                                width: '200px'
+                                width: '100%',
+                                minWidth: '150px',
+                                maxWidth: '200px'
                             }}
                         />
                     </div>

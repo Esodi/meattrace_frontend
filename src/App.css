@@ -542,7 +542,8 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .main-content {
-    margin-left: 0;
+    margin-left: 240px;
+    /* Adjust for tablet sidebar (220px) + gap */
     padding: 1.5rem;
   }
 
@@ -553,6 +554,8 @@
 
 @media (max-width: 768px) {
   .main-content {
+    margin-left: 0;
+    /* Sidebar is hidden/overlaid on mobile */
     padding: 1rem;
   }
 
