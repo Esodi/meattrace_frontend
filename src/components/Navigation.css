@@ -250,11 +250,15 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 99;
   opacity: 0;
+  pointer-events: none;
+  /* CRITICAL: prevents blocking clicks when invisible */
   transition: opacity 0.3s ease;
 }
 
 .sidebar-overlay.visible {
   opacity: 1;
+  pointer-events: auto;
+  /* Enable clicks when visible */
 }
 
 /* Responsive Styles */
