@@ -266,10 +266,9 @@ function AdminSlaughterParts() {
                         background: 'var(--bg-secondary, #f3f4f6)',
                         padding: '8px 12px',
                         borderRadius: '8px',
-                        borderRadius: '8px',
                         gap: '8px',
-                        flex: '1 1 auto',
-                        minWidth: '200px'
+                        flex: '1 1 200px',
+                        minWidth: '0'
                     }}>
                         <MdSearch />
                         <input
