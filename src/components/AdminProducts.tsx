@@ -300,7 +300,7 @@ function AdminProducts() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <h1><MdInventory style={{ verticalAlign: 'middle', marginRight: '8px' }} />Product Traceability</h1>
-                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div className="search-bar" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -421,7 +421,7 @@ function AdminProducts() {
                 animate={{ opacity: 1, y: 0 }}
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     gap: '12px',
                     marginBottom: '16px'
                 }}
@@ -654,7 +654,7 @@ function AdminProducts() {
                                     </div>
 
                                     {/* Product Name and Type */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
                                                 Product Name <span style={{ color: 'red' }}>*</span>
@@ -698,7 +698,7 @@ function AdminProducts() {
                                     </div>
 
                                     {/* Quantity, Weight, Price */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Quantity</label>
                                             <input

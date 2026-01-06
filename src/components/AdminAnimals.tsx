@@ -273,7 +273,7 @@ function AdminAnimals() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <h1><MdPets style={{ verticalAlign: 'middle', marginRight: '8px' }} />Animal Traceability</h1>
-                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div className="search-bar" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -380,7 +380,7 @@ function AdminAnimals() {
                 animate={{ opacity: 1, y: 0 }}
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     gap: '12px',
                     marginBottom: '16px'
                 }}
@@ -580,7 +580,7 @@ function AdminAnimals() {
                                     </div>
 
                                     {/* Species and Gender Row */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>Species</label>
                                             <select
@@ -623,7 +623,7 @@ function AdminAnimals() {
                                     </div>
 
                                     {/* Age and Weight Row */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
                                                 Age (months) <span style={{ color: 'red' }}>*</span>

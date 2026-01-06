@@ -259,7 +259,7 @@ function AdminSlaughterParts() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <h1><MdContentCut style={{ verticalAlign: 'middle', marginRight: '8px' }} />Slaughter Parts</h1>
-                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div className="search-bar" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -379,7 +379,7 @@ function AdminSlaughterParts() {
                 animate={{ opacity: 1, y: 0 }}
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     gap: '12px',
                     marginBottom: '16px'
                 }}

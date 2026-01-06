@@ -125,6 +125,7 @@ function ProcessingUnits() {
         className="header"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        style={{ flexWrap: 'wrap', height: 'auto' }}
       >
         <h1><MdFactory style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />Processing Units Management</h1>
         <motion.button
