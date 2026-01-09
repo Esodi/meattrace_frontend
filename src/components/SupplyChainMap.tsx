@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Icon, DivIcon } from 'leaflet';
 import { getMapLocations } from '../services/api';
+import { translateTerm } from '../services/translate';
 
 // Custom icons for different location types
 const createIcon = (color: string, emoji: string) => new DivIcon({
@@ -202,7 +203,7 @@ function SupplyChainMap() {
                                         borderRadius: '4px',
                                         display: 'inline-block'
                                     }}>
-                                        {loc.type}
+                                        {translateTerm(loc.type)}
                                     </div>
                                     {loc.location && (
                                         <div style={{ marginTop: '8px', fontSize: '12px' }}>

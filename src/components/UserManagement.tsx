@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
+import { translateRole } from '../services/translate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdAdd, MdEdit, MdDelete, MdClose, MdSave } from 'react-icons/md';
 
@@ -323,7 +324,7 @@ function UserManagement() {
                   <td>{user.first_name} {user.last_name}</td>
                   <td>
                     <span className={`role-badge role-${(user.profile_role || user.role || 'unknown').toLowerCase().replace(/\s+/g, '-')}`}>
-                      {(user.profile_role || user.role || 'Unknown').replace(/_/g, ' ')}
+                      {translateRole((user.profile_role || user.role || 'Unknown').replace(/_/g, ' '))}
                     </span>
                   </td>
                   <td>
