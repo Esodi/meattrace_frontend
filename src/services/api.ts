@@ -100,9 +100,10 @@ export const getSupplyChainStats = () => api.get('/admin/dashboard/supply_chain_
 export const getMapLocations = () => api.get('/admin/dashboard/map_locations/');
 
 // Animal Traceability APIs (Full CRUD)
-export const getAnimals = (params?: { lifecycle_status?: string }) => {
+export const getAnimals = (params?: { lifecycle_status?: string; slaughtered?: string }) => {
   const queryParams = new URLSearchParams();
   if (params?.lifecycle_status) queryParams.append('lifecycle_status', params.lifecycle_status);
+  if (params?.slaughtered) queryParams.append('slaughtered', params.slaughtered);
   const queryString = queryParams.toString();
   return api.get(`/admin/animals/${queryString ? `?${queryString}` : ''}`);
 };

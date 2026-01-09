@@ -114,13 +114,15 @@ function AdminSlaughterParts() {
     const loadDropdownData = async () => {
         setLoadingDropdowns(true);
         try {
+            // Use slaughtered=true filter to get all slaughtered animals
+            // (lifecycle_status: 'SLAUGHTERED' excludes transferred animals)
             const [animalsRes, puRes] = await Promise.all([
-                getAnimals({ lifecycle_status: 'SLAUGHTERED' }),
+                getAnimals({ slaughtered: 'true' }),
                 getProcessingUnits()
             ]);
-            // Filter to only slaughtered animals
+            // Animals are already filtered by the API
             const allAnimals = animalsRes.data.results || animalsRes.data || [];
-            setAnimals(allAnimals.filter((a: Animal) => a.slaughtered));
+            setAnimals(allAnimals);
             setProcessingUnits(puRes.data.results || puRes.data || []);
         } catch (err) {
             console.error('Error loading dropdown data:', err);
