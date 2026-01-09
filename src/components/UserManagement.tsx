@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { getUsers, createUser, updateUser, deleteUser } from '../services/api';
+import { getUsers, createUser, updateUser, deleteUser, getProcessingUnits, getShops } from '../services/api';
 import { translateRole } from '../services/translate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdAdd, MdEdit, MdDelete, MdClose, MdSave } from 'react-icons/md';
 
 import { User } from '../types';
+
+interface ProcessingUnit {
+  id: number;
+  name: string;
+  location: string;
+}
+
+interface Shop {
+  id: number;
+  name: string;
+  location: string;
+}
 
 function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,8 +32,14 @@ function UserManagement() {
     last_name: '',
     role: 'Farmer',
     phone: '',
-    address: ''
+    address: '',
+    processing_unit_id: '' as number | '',
+    shop_id: '' as number | ''
   });
+  const [processingUnits, setProcessingUnits] = useState<ProcessingUnit[]>([]);
+  const [shops, setShops] = useState<Shop[]>([]);
+  const [loadingPUs, setLoadingPUs] = useState(false);
+  const [loadingShops, setLoadingShops] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -42,6 +60,30 @@ function UserManagement() {
     }
   };
 
+  const loadProcessingUnits = async () => {
+    setLoadingPUs(true);
+    try {
+      const response = await getProcessingUnits();
+      setProcessingUnits(response.data.results || response.data || []);
+    } catch (err) {
+      console.error('Error loading processing units:', err);
+    } finally {
+      setLoadingPUs(false);
+    }
+  };
+
+  const loadShops = async () => {
+    setLoadingShops(true);
+    try {
+      const response = await getShops();
+      setShops(response.data.results || response.data || []);
+    } catch (err) {
+      console.error('Error loading shops:', err);
+    } finally {
+      setLoadingShops(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -51,6 +93,18 @@ function UserManagement() {
         if (!updateData.password) {
           delete (updateData as any).password;
         }
+        // Only send processing_unit_id if role is Processor
+        if (updateData.role !== 'Processor') {
+          delete (updateData as any).processing_unit_id;
+        } else if (updateData.processing_unit_id) {
+          (updateData as any).processing_unit_id = Number(updateData.processing_unit_id);
+        }
+        // Only send shop_id if role is ShopOwner
+        if (updateData.role !== 'ShopOwner') {
+          delete (updateData as any).shop_id;
+        } else if (updateData.shop_id) {
+          (updateData as any).shop_id = Number(updateData.shop_id);
+        }
         await updateUser(editingUser.id, updateData);
       } else {
         // For create, password is required
@@ -58,7 +112,20 @@ function UserManagement() {
           setError('Password is required for new users');
           return;
         }
-        await createUser(formData);
+        const createData = { ...formData };
+        // Only send processing_unit_id if role is Processor
+        if (createData.role !== 'Processor') {
+          delete (createData as any).processing_unit_id;
+        } else if (createData.processing_unit_id) {
+          (createData as any).processing_unit_id = Number(createData.processing_unit_id);
+        }
+        // Only send shop_id if role is ShopOwner
+        if (createData.role !== 'ShopOwner') {
+          delete (createData as any).shop_id;
+        } else if (createData.shop_id) {
+          (createData as any).shop_id = Number(createData.shop_id);
+        }
+        await createUser(createData);
       }
       await loadUsers();
       resetForm();
@@ -79,9 +146,18 @@ function UserManagement() {
       last_name: user.last_name || '',
       role: user.profile_role || user.role || 'Farmer',
       phone: (user as any).profile_phone || '',
-      address: (user as any).profile_address || ''
+      address: (user as any).profile_address || '',
+      processing_unit_id: (user as any).profile_processing_unit_id || '',
+      shop_id: (user as any).profile_shop_id || ''
     });
     setShowForm(true);
+    // Load associated data if roles require it
+    const userRole = user.profile_role || user.role;
+    if (userRole === 'Processor') {
+      loadProcessingUnits();
+    } else if (userRole === 'ShopOwner') {
+      loadShops();
+    }
   };
 
   const handleDelete = async (userId: number) => {
@@ -105,7 +181,9 @@ function UserManagement() {
       last_name: '',
       role: 'Farmer',
       phone: '',
-      address: ''
+      address: '',
+      processing_unit_id: '',
+      shop_id: ''
     });
     setEditingUser(null);
     setShowForm(false);
@@ -113,10 +191,19 @@ function UserManagement() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    // If role changed, load associated data
+    if (name === 'role') {
+      if (value === 'Processor') {
+        loadProcessingUnits();
+      } else if (value === 'ShopOwner') {
+        loadShops();
+      }
+    }
   };
 
   if (loading) {
@@ -222,6 +309,58 @@ function UserManagement() {
                   </select>
                 </div>
               </div>
+
+              {formData.role === 'Processor' && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Assigned Processing Unit:</label>
+                    <select
+                      name="processing_unit_id"
+                      value={formData.processing_unit_id}
+                      onChange={handleInputChange}
+                      required={formData.role === 'Processor'}
+                      disabled={loadingPUs}
+                    >
+                      <option value="">Select a processing unit...</option>
+                      {processingUnits.map(pu => (
+                        <option key={pu.id} value={pu.id}>
+                          {pu.name} ({pu.location})
+                        </option>
+                      ))}
+                    </select>
+                    {loadingPUs && <span style={{ fontSize: '12px', color: '#666' }}>Loading facilities...</span>}
+                    {processingUnits.length === 0 && !loadingPUs && (
+                      <span style={{ fontSize: '12px', color: '#dc2626' }}>No processing units found. Create one first.</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {formData.role === 'ShopOwner' && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Assigned Shop:</label>
+                    <select
+                      name="shop_id"
+                      value={formData.shop_id}
+                      onChange={handleInputChange}
+                      required={formData.role === 'ShopOwner'}
+                      disabled={loadingShops}
+                    >
+                      <option value="">Select a shop...</option>
+                      {shops.map(shop => (
+                        <option key={shop.id} value={shop.id}>
+                          {shop.name} ({shop.location})
+                        </option>
+                      ))}
+                    </select>
+                    {loadingShops && <span style={{ fontSize: '12px', color: '#666' }}>Loading shops...</span>}
+                    {shops.length === 0 && !loadingShops && (
+                      <span style={{ fontSize: '12px', color: '#dc2626' }}>No shops found. Create one first.</span>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="form-row">
                 <div className="form-group">
                   <label>First Name:</label>
