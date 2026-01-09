@@ -180,7 +180,7 @@ function AdminAnimals() {
 
         // Validation
         if (!formData.farmer_id) {
-            setFormError('Please select a farmer.');
+            setFormError('Please select an abattoir.');
             return;
         }
         if (!formData.age || formData.age <= 0) {
@@ -287,7 +287,7 @@ function AdminAnimals() {
                         <MdSearch />
                         <input
                             type="text"
-                            placeholder="Search ID, name, farmer..."
+                            placeholder="Search ID, name, abattoir..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
@@ -431,7 +431,7 @@ function AdminAnimals() {
                                 <th>Name</th>
                                 <th>Species</th>
                                 <th>Status</th>
-                                <th>Farmer</th>
+                                <th>Abattoir</th>
                                 <th>Location</th>
                                 <th>Registered</th>
                                 <th>Actions</th>
@@ -564,7 +564,7 @@ function AdminAnimals() {
                                     {/* Farmer Selection */}
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
-                                            Farmer <span style={{ color: 'red' }}>*</span>
+                                            Abattoir <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
                                             name="farmer_id"
@@ -574,7 +574,7 @@ function AdminAnimals() {
                                             disabled={loadingDropdowns}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                         >
-                                            <option value="">Select a farmer...</option>
+                                            <option value="">Select an abattoir...</option>
                                             {farmers.map(farmer => (
                                                 <option key={farmer.id} value={farmer.id}>
                                                     {farmer.full_name} ({farmer.username}) - {farmer.animal_count} animals

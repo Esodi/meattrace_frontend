@@ -214,7 +214,7 @@ function UserManagement() {
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="Farmer">Farmer</option>
+                    <option value="Farmer">Abattoir</option>
                     <option value="Processor">Processor</option>
                     <option value="ShopOwner">Shop Owner</option>
                     <option value="Admin">Admin</option>

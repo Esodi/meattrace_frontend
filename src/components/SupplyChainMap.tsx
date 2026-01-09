@@ -118,7 +118,7 @@ function SupplyChainMap() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={{ marginRight: '8px' }}>🌾</span>
-                    <span>Farmers {summary && `(${summary.farmers.geocoded}/${summary.farmers.total})`}</span>
+                    <span>Abattoirs {summary && `(${summary.farmers.geocoded}/${summary.farmers.total})`}</span>
                 </div>
             </div>
 
