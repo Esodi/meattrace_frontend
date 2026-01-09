@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdSearch, MdFilterList, MdInventory, MdVisibility, MdRefresh, MdAdd, MdClose, MdDelete } from 'react-icons/md';
-import { createProduct, deleteProduct, getProcessingUnits, getAnimals, getShops } from '../services/api';
+import { MdSearch, MdFilterList, MdInventory, MdRefresh, MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
+import { createProduct, updateProduct, deleteProduct, getProcessingUnits, getAnimals, getShops } from '../services/api';
 import api from '../services/api';
 
 interface Product {
@@ -9,10 +9,16 @@ interface Product {
     name: string;
     batch_number: string;
     product_type: string;
+    description?: string;
     quantity: number;
     weight: number;
+    weight_unit?: string;
+    price?: number;
+    animal: number;
     animal_id: string | null;
+    processing_unit: number;
     processing_unit_name: string | null;
+    shop?: number;
     transferred_to_name: string | null;
     received_by_shop_name: string | null;
     category_name: string | null;
@@ -76,7 +82,8 @@ function AdminProducts() {
     const [showFilters, setShowFilters] = useState(false);
 
     // Modal state
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -147,6 +154,7 @@ function AdminProducts() {
     };
 
     const handleOpenAddModal = () => {
+        setEditingProduct(null);
         setFormData({
             processing_unit_id: '',
             animal_id: '',
@@ -162,11 +170,32 @@ function AdminProducts() {
         });
         setFormError(null);
         loadDropdownData();
-        setShowAddModal(true);
+        setShowModal(true);
+    };
+
+    const handleOpenEditModal = (product: Product) => {
+        setEditingProduct(product);
+        setFormData({
+            processing_unit_id: product.processing_unit || '',
+            animal_id: product.animal || '',
+            shop_id: product.shop || null,
+            name: product.name || '',
+            batch_number: product.batch_number || '',
+            product_type: product.product_type || 'meat',
+            quantity: product.quantity || '',
+            weight: product.weight || '',
+            weight_unit: product.weight_unit || 'kg',
+            price: product.price || '',
+            description: product.description || '',
+        });
+        setFormError(null);
+        loadDropdownData();
+        setShowModal(true);
     };
 
     const handleCloseModal = () => {
-        setShowAddModal(false);
+        setShowModal(false);
+        setEditingProduct(null);
         setFormError(null);
     };
 
@@ -207,15 +236,20 @@ function AdminProducts() {
                 shop_id: formData.shop_id ? Number(formData.shop_id) : null,
             };
 
-            await createProduct(payload);
-            setShowAddModal(false);
+            if (editingProduct) {
+                await updateProduct(editingProduct.id, payload);
+            } else {
+                await createProduct(payload);
+            }
+            setShowModal(false);
+            setEditingProduct(null);
             loadProducts();
         } catch (err: any) {
-            console.error('Error creating product:', err);
+            console.error('Error saving product:', err);
             const errorMsg = err.response?.data?.detail ||
                 err.response?.data?.message ||
                 Object.values(err.response?.data || {}).flat().join(', ') ||
-                'Failed to create product.';
+                `Failed to ${editingProduct ? 'update' : 'create'} product.`;
             setFormError(errorMsg);
         } finally {
             setSubmitting(false);
@@ -539,8 +573,10 @@ function AdminProducts() {
                                                         className="btn btn-sm btn-secondary"
                                                         whileHover={{ scale: 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
+                                                        onClick={() => handleOpenEditModal(product)}
+                                                        title="Edit"
                                                     >
-                                                        <MdVisibility /> View
+                                                        <MdEdit />
                                                     </motion.button>
                                                     <motion.button
                                                         className="btn btn-sm btn-danger"
@@ -562,9 +598,9 @@ function AdminProducts() {
                 </div>
             </motion.div>
 
-            {/* Add Product Modal */}
+            {/* Add/Edit Product Modal */}
             <AnimatePresence>
-                {showAddModal && (
+                {showModal && (
                     <motion.div
                         className="modal-overlay"
                         initial={{ opacity: 0 }}
@@ -599,7 +635,7 @@ function AdminProducts() {
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>Add New Product</h2>
+                                <h2 style={{ margin: 0 }}>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
                                 <button onClick={handleCloseModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>
                                     <MdClose />
                                 </button>
@@ -810,7 +846,7 @@ function AdminProducts() {
                                         disabled={submitting}
                                         style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
                                     >
-                                        {submitting ? 'Creating...' : <><MdAdd /> Create Product</>}
+                                        {submitting ? (editingProduct ? 'Saving...' : 'Creating...') : (editingProduct ? <><MdEdit /> Save Changes</> : <><MdAdd /> Create Product</>)}
                                     </button>
                                 </div>
                             </form>

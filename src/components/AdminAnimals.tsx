@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdSearch, MdFilterList, MdPets, MdVisibility, MdRefresh, MdAdd, MdClose, MdEdit, MdDelete } from 'react-icons/md';
-import { createAnimal, deleteAnimal, getFarmers, getProcessingUnits } from '../services/api';
+import { createAnimal, updateAnimal, deleteAnimal, getFarmers, getProcessingUnits } from '../services/api';
 import api from '../services/api';
 
 interface Animal {
@@ -9,9 +9,14 @@ interface Animal {
     animal_id: string;
     animal_name: string;
     species: string;
+    breed?: string;
     age: number;
+    gender?: string;
     live_weight: number;
+    notes?: string;
+    farmer: number;
     farmer_name: string;
+    transferred_to?: number;
     processing_unit_name: string | null;
     slaughtered: boolean;
     slaughtered_at: string | null;
@@ -74,7 +79,8 @@ function AdminAnimals() {
     const [showFilters, setShowFilters] = useState(false);
 
     // Modal state
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [editingAnimal, setEditingAnimal] = useState<Animal | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -140,6 +146,7 @@ function AdminAnimals() {
     };
 
     const handleOpenAddModal = () => {
+        setEditingAnimal(null);
         setFormData({
             farmer_id: '',
             species: 'cow',
@@ -153,11 +160,30 @@ function AdminAnimals() {
         });
         setFormError(null);
         loadDropdownData();
-        setShowAddModal(true);
+        setShowModal(true);
+    };
+
+    const handleOpenEditModal = (animal: Animal) => {
+        setEditingAnimal(animal);
+        setFormData({
+            farmer_id: animal.farmer || '',
+            species: animal.species || 'cow',
+            animal_name: animal.animal_name || '',
+            age: animal.age || '',
+            gender: animal.gender || 'unknown',
+            live_weight: animal.live_weight || '',
+            notes: animal.notes || '',
+            processing_unit_id: animal.transferred_to || null,
+            slaughtered: animal.slaughtered || false,
+        });
+        setFormError(null);
+        loadDropdownData();
+        setShowModal(true);
     };
 
     const handleCloseModal = () => {
-        setShowAddModal(false);
+        setShowModal(false);
+        setEditingAnimal(null);
         setFormError(null);
     };
 
@@ -196,15 +222,20 @@ function AdminAnimals() {
                 processing_unit_id: formData.processing_unit_id ? Number(formData.processing_unit_id) : null,
             };
 
-            await createAnimal(payload);
-            setShowAddModal(false);
+            if (editingAnimal) {
+                await updateAnimal(editingAnimal.id, payload);
+            } else {
+                await createAnimal(payload);
+            }
+            setShowModal(false);
+            setEditingAnimal(null);
             loadAnimals();
         } catch (err: any) {
-            console.error('Error creating animal:', err);
+            console.error('Error saving animal:', err);
             const errorMsg = err.response?.data?.detail ||
                 err.response?.data?.message ||
                 Object.values(err.response?.data || {}).flat().join(', ') ||
-                'Failed to create animal.';
+                `Failed to ${editingAnimal ? 'update' : 'create'} animal.`;
             setFormError(errorMsg);
         } finally {
             setSubmitting(false);
@@ -485,9 +516,10 @@ function AdminAnimals() {
                                                         className="btn btn-sm btn-secondary"
                                                         whileHover={{ scale: 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
-                                                        title="View"
+                                                        onClick={() => handleOpenEditModal(animal)}
+                                                        title="Edit"
                                                     >
-                                                        <MdVisibility />
+                                                        <MdEdit />
                                                     </motion.button>
                                                     <motion.button
                                                         className="btn btn-sm btn-danger"
@@ -510,9 +542,9 @@ function AdminAnimals() {
                 </div>
             </motion.div>
 
-            {/* Add Animal Modal */}
+            {/* Add/Edit Animal Modal */}
             <AnimatePresence>
-                {showAddModal && (
+                {showModal && (
                     <motion.div
                         className="modal-overlay"
                         initial={{ opacity: 0 }}
@@ -547,7 +579,7 @@ function AdminAnimals() {
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>Add New Animal</h2>
+                                <h2 style={{ margin: 0 }}>{editingAnimal ? 'Edit Animal' : 'Add New Animal'}</h2>
                                 <button onClick={handleCloseModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>
                                     <MdClose />
                                 </button>
@@ -722,7 +754,7 @@ function AdminAnimals() {
                                         disabled={submitting}
                                         style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
                                     >
-                                        {submitting ? 'Creating...' : <><MdAdd /> Create Animal</>}
+                                        {submitting ? (editingAnimal ? 'Saving...' : 'Creating...') : (editingAnimal ? <><MdEdit /> Save Changes</> : <><MdAdd /> Create Animal</>)}
                                     </button>
                                 </div>
                             </form>

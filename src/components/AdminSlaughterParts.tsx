@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdSearch, MdFilterList, MdRefresh, MdAdd, MdClose, MdDelete, MdVisibility, MdContentCut } from 'react-icons/md';
-import { getSlaughterParts, createSlaughterPart, deleteSlaughterPart, getAnimals, getProcessingUnits } from '../services/api';
+import { MdSearch, MdFilterList, MdRefresh, MdAdd, MdClose, MdDelete, MdEdit, MdContentCut } from 'react-icons/md';
+import { getSlaughterParts, createSlaughterPart, updateSlaughterPart, deleteSlaughterPart, getAnimals, getProcessingUnits } from '../services/api';
 
 interface SlaughterPart {
     id: number;
@@ -73,7 +73,8 @@ function AdminSlaughterParts() {
     const [showFilters, setShowFilters] = useState(false);
 
     // Modal state
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [editingPart, setEditingPart] = useState<SlaughterPart | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -132,6 +133,7 @@ function AdminSlaughterParts() {
     };
 
     const handleOpenAddModal = () => {
+        setEditingPart(null);
         setFormData({
             animal_id: '',
             part_type: 'whole_carcass',
@@ -142,11 +144,27 @@ function AdminSlaughterParts() {
         });
         setFormError(null);
         loadDropdownData();
-        setShowAddModal(true);
+        setShowModal(true);
+    };
+
+    const handleOpenEditModal = (part: SlaughterPart) => {
+        setEditingPart(part);
+        setFormData({
+            animal_id: part.animal || '',
+            part_type: part.part_type || 'whole_carcass',
+            weight: part.weight || '',
+            weight_unit: part.weight_unit || 'kg',
+            description: part.description || '',
+            processing_unit_id: part.transferred_to || null,
+        });
+        setFormError(null);
+        loadDropdownData();
+        setShowModal(true);
     };
 
     const handleCloseModal = () => {
-        setShowAddModal(false);
+        setShowModal(false);
+        setEditingPart(null);
         setFormError(null);
     };
 
@@ -182,15 +200,20 @@ function AdminSlaughterParts() {
                 processing_unit_id: formData.processing_unit_id ? Number(formData.processing_unit_id) : null,
             };
 
-            await createSlaughterPart(payload);
-            setShowAddModal(false);
+            if (editingPart) {
+                await updateSlaughterPart(editingPart.id, payload);
+            } else {
+                await createSlaughterPart(payload);
+            }
+            setShowModal(false);
+            setEditingPart(null);
             loadParts();
         } catch (err: any) {
-            console.error('Error creating slaughter part:', err);
+            console.error('Error saving slaughter part:', err);
             const errorMsg = err.response?.data?.detail ||
                 err.response?.data?.message ||
                 Object.values(err.response?.data || {}).flat().join(', ') ||
-                'Failed to create slaughter part.';
+                `Failed to ${editingPart ? 'update' : 'create'} slaughter part.`;
             setFormError(errorMsg);
         } finally {
             setSubmitting(false);
@@ -484,9 +507,10 @@ function AdminSlaughterParts() {
                                                         className="btn btn-sm btn-secondary"
                                                         whileHover={{ scale: 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
-                                                        title="View"
+                                                        onClick={() => handleOpenEditModal(part)}
+                                                        title="Edit"
                                                     >
-                                                        <MdVisibility />
+                                                        <MdEdit />
                                                     </motion.button>
                                                     <motion.button
                                                         className="btn btn-sm btn-danger"
@@ -509,9 +533,9 @@ function AdminSlaughterParts() {
                 </div>
             </motion.div>
 
-            {/* Add Part Modal */}
+            {/* Add/Edit Part Modal */}
             <AnimatePresence>
-                {showAddModal && (
+                {showModal && (
                     <motion.div
                         className="modal-overlay"
                         initial={{ opacity: 0 }}
@@ -546,7 +570,7 @@ function AdminSlaughterParts() {
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>Add Slaughter Part</h2>
+                                <h2 style={{ margin: 0 }}>{editingPart ? 'Edit Slaughter Part' : 'Add Slaughter Part'}</h2>
                                 <button onClick={handleCloseModal} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>
                                     <MdClose />
                                 </button>
@@ -686,7 +710,7 @@ function AdminSlaughterParts() {
                                         disabled={submitting || animals.length === 0}
                                         style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
                                     >
-                                        {submitting ? 'Creating...' : <><MdAdd /> Create Part</>}
+                                        {submitting ? (editingPart ? 'Saving...' : 'Creating...') : (editingPart ? <><MdEdit /> Save Changes</> : <><MdAdd /> Create Part</>)}
                                     </button>
                                 </div>
                             </form>
