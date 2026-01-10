@@ -447,6 +447,7 @@ function UserManagement() {
                 <th>Email</th>
                 <th>Name</th>
                 <th>Role</th>
+                <th>Linked Entity</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -465,6 +466,29 @@ function UserManagement() {
                     <span className={`role-badge role-${(user.profile_role || user.role || 'unknown').toLowerCase().replace(/\s+/g, '-')}`}>
                       {translateRole((user.profile_role || user.role || 'Unknown').replace(/_/g, ' '))}
                     </span>
+                  </td>
+                  <td>
+                    {user.profile_role === 'Processor' && (
+                      <div className="entity-link">
+                        <span className="entity-icon" style={{ marginRight: '8px' }}>🏭</span>
+                        <span className="entity-name">{user.profile_processing_unit || 'Unassigned'}</span>
+                      </div>
+                    )}
+                    {user.profile_role === 'ShopOwner' && (
+                      <div className="entity-link">
+                        <span className="entity-icon" style={{ marginRight: '8px' }}>🏪</span>
+                        <span className="entity-name">{user.profile_shop || 'Unassigned'}</span>
+                      </div>
+                    )}
+                    {user.profile_role === 'Farmer' && (
+                      <div className="entity-link">
+                        <span className="entity-icon" style={{ marginRight: '8px' }}>🌾</span>
+                        <span className="entity-name">Abattoir</span>
+                      </div>
+                    )}
+                    {!['Processor', 'ShopOwner', 'Farmer'].includes(user.profile_role || user.role) && (
+                      <span className="text-muted">-</span>
+                    )}
                   </td>
                   <td>
                     <motion.button

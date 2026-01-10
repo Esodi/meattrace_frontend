@@ -62,6 +62,7 @@ function SupplyChainMap() {
     const [summary, setSummary] = useState<MapSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [visibleTypes, setVisibleTypes] = useState<string[]>(['Processing Unit', 'Shop', 'Farmer']);
 
     // Center on Tanzania
     const center = [-6.3690, 34.8888] as [number, number];
@@ -94,33 +95,67 @@ function SupplyChainMap() {
         return icons[type as keyof typeof icons] || defaultIcon;
     };
 
+    const toggleType = (type: string) => {
+        setVisibleTypes(prev =>
+            prev.includes(type)
+                ? prev.filter(t => t !== type)
+                : [...prev, type]
+        );
+    };
+
+    const filteredLocations = locations.filter(loc => visibleTypes.includes(loc.type));
+
     return (
         <div style={{ position: 'relative' }}>
-            {/* Legend */}
+            {/* Legend / Filter */}
             <div style={{
                 position: 'absolute',
                 top: '10px',
                 right: '10px',
                 zIndex: 1000,
                 background: 'white',
-                padding: '10px 15px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                fontSize: '12px',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                fontSize: '13px',
+                minWidth: '200px',
             }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Legend</div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ marginRight: '8px' }}>🏭</span>
-                    <span>Processing Units {summary && `(${summary.processing_units.geocoded}/${summary.processing_units.total})`}</span>
+                <div style={{ fontWeight: 600, marginBottom: '12px', color: '#1f2937', borderBottom: '1px solid #f3f4f6', paddingBottom: '8px' }}>
+                    Map Filters
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ marginRight: '8px' }}>🏪</span>
-                    <span>Shops {summary && `(${summary.shops.geocoded}/${summary.shops.total})`}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                    <input
+                        type="checkbox"
+                        checked={visibleTypes.includes('Farmer')}
+                        onChange={() => toggleType('Farmer')}
+                        style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#f59e0b' }}
+                    />
                     <span style={{ marginRight: '8px' }}>🌾</span>
-                    <span>Abattoirs {summary && `(${summary.farmers.geocoded}/${summary.farmers.total})`}</span>
-                </div>
+                    <span>Abattoirs {summary && <span style={{ color: '#666', fontSize: '11px' }}>({summary.farmers.geocoded}/{summary.farmers.total})</span>}</span>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                    <input
+                        type="checkbox"
+                        checked={visibleTypes.includes('Processing Unit')}
+                        onChange={() => toggleType('Processing Unit')}
+                        style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#6366f1' }}
+                    />
+                    <span style={{ marginRight: '8px' }}>🏭</span>
+                    <span>Processing Units {summary && <span style={{ color: '#666', fontSize: '11px' }}>({summary.processing_units.geocoded}/{summary.processing_units.total})</span>}</span>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}>
+                    <input
+                        type="checkbox"
+                        checked={visibleTypes.includes('Shop')}
+                        onChange={() => toggleType('Shop')}
+                        style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#10b981' }}
+                    />
+                    <span style={{ marginRight: '8px' }}>🏪</span>
+                    <span>Shops {summary && <span style={{ color: '#666', fontSize: '11px' }}>({summary.shops.geocoded}/{summary.shops.total})</span>}</span>
+                </label>
             </div>
 
             {/* Loading overlay */}
@@ -185,7 +220,7 @@ function SupplyChainMap() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    {locations.map((loc) => (
+                    {filteredLocations.map((loc) => (
                         <Marker
                             key={loc.id}
                             position={[loc.lat, loc.lng] as [number, number]}
