@@ -16,6 +16,7 @@ import Certifications from './components/Certifications';
 import SupplyChainMonitor from './components/SupplyChainMonitor';
 import ApprovalWorkflows from './components/ApprovalWorkflows';
 import GovernmentReports from './components/GovernmentReports';
+import CustomReports from './components/CustomReports';
 import Navigation from './components/Navigation';
 
 import { User } from './types';
@@ -80,6 +81,7 @@ function App() {
             <Route path="/supply-chain" element={<SupplyChainMonitor />} />
             <Route path="/approvals" element={<ApprovalWorkflows />} />
             <Route path="/reports" element={<GovernmentReports />} />
+            <Route path="/reports/custom" element={<CustomReports />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

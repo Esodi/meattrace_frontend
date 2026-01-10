@@ -93,6 +93,19 @@ export const deleteShop = (shopId: number | string) => api.delete(`/admin/shops/
 export const getAnalytics = (period = '30d') => api.get(`/admin/analytics/overview/?period=${period}`);
 export const getDailyStats = (days = 30) => api.get(`/admin/analytics/daily_stats/?days=${days}`);
 
+// Custom Reporting APIs
+export const getCustomReport = (params: any) => {
+  const queryParams = new URLSearchParams(params);
+  return api.get(`/admin/analytics/custom_report/?${queryParams.toString()}`);
+};
+
+export const exportReportExcel = (params: any) => {
+  const queryParams = new URLSearchParams(params);
+  return api.get(`/admin/analytics/export_excel/?${queryParams.toString()}`, {
+    responseType: 'blob'
+  });
+};
+
 // Supply Chain Stats
 export const getSupplyChainStats = () => api.get('/admin/dashboard/supply_chain_stats/');
 

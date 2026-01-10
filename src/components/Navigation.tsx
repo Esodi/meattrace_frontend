@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MdDashboard, MdPeople, MdFactory, MdStorefront, MdLogout, MdAccountCircle, MdPets, MdInventory, MdAssignment, MdVerified, MdMap, MdPendingActions, MdTrendingUp, MdMenu, MdClose, MdContentCut } from 'react-icons/md';
+import { MdDashboard, MdPeople, MdFactory, MdStorefront, MdLogout, MdAccountCircle, MdPets, MdInventory, MdAssignment, MdVerified, MdMap, MdPendingActions, MdTrendingUp, MdMenu, MdClose, MdContentCut, MdAssessment } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Navigation.css';
 
@@ -128,7 +128,13 @@ function Navigation({ user, onLogout }: NavigationProps) {
           <li className={location.pathname === '/reports' ? 'active' : ''}>
             <Link to="/reports" onClick={closeMobileMenu}>
               <span className="icon"><MdTrendingUp /></span>
-              Reports
+              Standard Reports
+            </Link>
+          </li>
+          <li className={location.pathname === '/reports/custom' ? 'active' : ''}>
+            <Link to="/reports/custom" onClick={closeMobileMenu}>
+              <span className="icon"><MdAssessment /></span>
+              Custom Reports
             </Link>
           </li>
         </ul>
