@@ -94,14 +94,24 @@ export const getAnalytics = (period = '30d') => api.get(`/admin/analytics/overvi
 export const getDailyStats = (days = 30) => api.get(`/admin/analytics/daily_stats/?days=${days}`);
 
 // Custom Reporting APIs
-export const getCustomReport = (params: any) => {
-  const queryParams = new URLSearchParams(params);
-  return api.get(`/admin/analytics/custom_report/?${queryParams.toString()}`);
+export const getCustomReport = (params: Record<string, string>) => {
+  // Filter out empty values
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+  );
+  const queryParams = new URLSearchParams(filteredParams);
+  const queryString = queryParams.toString();
+  return api.get(`/admin/analytics/custom_report/${queryString ? `?${queryString}` : ''}`);
 };
 
-export const exportReportExcel = (params: any) => {
-  const queryParams = new URLSearchParams(params);
-  return api.get(`/admin/analytics/export_excel/?${queryParams.toString()}`, {
+export const exportReportExcel = (params: Record<string, string>) => {
+  // Filter out empty values
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+  );
+  const queryParams = new URLSearchParams(filteredParams);
+  const queryString = queryParams.toString();
+  return api.get(`/admin/analytics/export_excel/${queryString ? `?${queryString}` : ''}`, {
     responseType: 'blob'
   });
 };
