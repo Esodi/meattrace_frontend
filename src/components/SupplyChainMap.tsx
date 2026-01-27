@@ -28,7 +28,7 @@ const createIcon = (color: string, emoji: string) => new DivIcon({
 const icons = {
     'Processing Unit': createIcon('#6366f1', '🏭'),
     'Shop': createIcon('#10b981', '🏪'),
-    'Farmer': createIcon('#f59e0b', '🌾'),
+    'Abbatoir': createIcon('#f59e0b', '🌾'),
 };
 
 // Fallback icon
@@ -43,7 +43,7 @@ const defaultIcon = new Icon({
 interface MapLocation {
     id: string;
     name: string;
-    type: 'Processing Unit' | 'Shop' | 'Farmer';
+    type: 'Processing Unit' | 'Shop' | 'Abbatoir';
     lat: number;
     lng: number;
     location: string;
@@ -54,7 +54,7 @@ interface MapLocation {
 interface MapSummary {
     processing_units: { total: number; geocoded: number };
     shops: { total: number; geocoded: number };
-    farmers: { total: number; geocoded: number };
+    abbatoirs: { total: number; geocoded: number };
 }
 
 function SupplyChainMap() {
@@ -62,7 +62,7 @@ function SupplyChainMap() {
     const [summary, setSummary] = useState<MapSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [visibleTypes, setVisibleTypes] = useState<string[]>(['Processing Unit', 'Shop', 'Farmer']);
+    const [visibleTypes, setVisibleTypes] = useState<string[]>(['Processing Unit', 'Shop', 'Abbatoir']);
 
     // Center on Tanzania
     const center = [-6.3690, 34.8888] as [number, number];
@@ -127,12 +127,12 @@ function SupplyChainMap() {
                 <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer', userSelect: 'none' }}>
                     <input
                         type="checkbox"
-                        checked={visibleTypes.includes('Farmer')}
-                        onChange={() => toggleType('Farmer')}
+                        checked={visibleTypes.includes('Abbatoir')}
+                        onChange={() => toggleType('Abbatoir')}
                         style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#f59e0b' }}
                     />
                     <span style={{ marginRight: '8px' }}>🌾</span>
-                    <span>Abattoirs {summary && <span style={{ color: '#666', fontSize: '11px' }}>({summary.farmers.geocoded}/{summary.farmers.total})</span>}</span>
+                    <span>Abattoirs {summary && <span style={{ color: '#666', fontSize: '11px' }}>({summary.abbatoirs.geocoded}/{summary.abbatoirs.total})</span>}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', cursor: 'pointer', userSelect: 'none' }}>

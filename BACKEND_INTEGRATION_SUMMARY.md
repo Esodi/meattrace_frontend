@@ -5,8 +5,8 @@
 ### ✅ Removed All Mock Data
 All hardcoded test data has been removed from the following components:
 - **Dashboard.js**: Removed mock statistics (45 users, 12 units, 28 shops, etc.)
-- **UserManagement.js**: Removed 3 mock users (john_farmer, mary_processor, bob_shop)
-- **ProcessingUnits.js**: Removed 2 mock processing units (City Meat Processing, Farm Fresh Processors)
+- **UserManagement.js**: Removed 3 mock users (john_abbatoir, mary_processor, bob_shop)
+- **ProcessingUnits.js**: Removed 2 mock processing units (City Meat Processing, Abbatoir Fresh Processors)
 - **Shops.js**: Removed 2 mock shops (Fresh Meat Market, Quality Butchers)
 
 ### ✅ Integrated Real Backend APIs
@@ -20,7 +20,7 @@ All hardcoded test data has been removed from the following components:
 #### Dashboard Integration
 - **Endpoint**: `GET /api/v2/admin/dashboard/stats/`
 - **Real Data**: 
-  - total_users, total_farmers, total_processors, total_shop_owners, total_admins
+  - total_users, total_abbatoirs, total_processors, total_shop_owners, total_admins
   - total_processing_units, active_processing_units
   - total_shops, active_shops
   - total_animals, total_products, total_orders, total_sales

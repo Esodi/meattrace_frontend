@@ -286,7 +286,7 @@ function ProcessingUnits() {
                   </td>
                   <td><span className="license-badge">{unit.license_number || 'N/A'}</span></td>
                   <td>
-                    <span className={`role-badge ${(unit as any).is_active !== false ? 'role-admin' : 'role-farmer'}`}>
+                    <span className={`role-badge ${(unit as any).is_active !== false ? 'role-admin' : 'role-abbatoir'}`}>
                       {(unit as any).is_active !== false ? 'Active' : 'Inactive'}
                     </span>
                   </td>

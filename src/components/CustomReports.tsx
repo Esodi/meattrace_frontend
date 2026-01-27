@@ -6,7 +6,7 @@ import {
 } from 'react-icons/md';
 import {
     getCustomReport, exportReportExcel,
-    getShops, getProcessingUnits, getFarmers
+    getShops, getProcessingUnits, getAbbatoirs
 } from '../services/api';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -32,7 +32,7 @@ const CustomReports: React.FC = () => {
         end_date: '',
         shop_id: '',
         processing_unit_id: '',
-        farmer_id: '',
+        abbatoir_id: '',
     });
 
     const [reportData, setReportData] = useState<{
@@ -44,8 +44,8 @@ const CustomReports: React.FC = () => {
     const [entities, setEntities] = useState<{
         shops: any[];
         units: any[];
-        farmers: any[];
-    }>({ shops: [], units: [], farmers: [] });
+        abbatoirs: any[];
+    }>({ shops: [], units: [], abbatoirs: [] });
 
     const reportRef = useRef<HTMLDivElement>(null);
 
@@ -55,15 +55,15 @@ const CustomReports: React.FC = () => {
 
     const fetchEntities = async () => {
         try {
-            const [shopsRes, unitsRes, farmersRes] = await Promise.all([
+            const [shopsRes, unitsRes, abbatoirsRes] = await Promise.all([
                 getShops(),
                 getProcessingUnits(),
-                getFarmers()
+                getAbbatoirs()
             ]);
             setEntities({
                 shops: shopsRes.data?.results || shopsRes.data || [],
                 units: unitsRes.data?.results || unitsRes.data || [],
-                farmers: farmersRes.data?.results || farmersRes.data || []
+                abbatoirs: abbatoirsRes.data?.results || abbatoirsRes.data || []
             });
         } catch (err) {
             console.error("Failed to fetch entities for filters", err);
@@ -213,15 +213,15 @@ const CustomReports: React.FC = () => {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label><MdPerson /> Farmer (Abattoir)</label>
+                        <label><MdPerson /> Abbatoir (Abattoir)</label>
                         <select
                             className="form-control"
-                            value={filters.farmer_id}
-                            onChange={(e) => setFilters({ ...filters, farmer_id: e.target.value })}
+                            value={filters.abbatoir_id}
+                            onChange={(e) => setFilters({ ...filters, abbatoir_id: e.target.value })}
                         >
-                            <option value="">All Farmers</option>
-                            {entities.farmers.map(farmer => (
-                                <option key={farmer.id} value={farmer.id}>{farmer.username}</option>
+                            <option value="">All Abbatoirs</option>
+                            {entities.abbatoirs.map(abbatoir => (
+                                <option key={abbatoir.id} value={abbatoir.id}>{abbatoir.username}</option>
                             ))}
                         </select>
                     </div>

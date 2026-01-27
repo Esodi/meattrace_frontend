@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdSearch, MdFilterList, MdPets, MdVisibility, MdRefresh, MdAdd, MdClose, MdEdit, MdDelete } from 'react-icons/md';
-import { createAnimal, updateAnimal, deleteAnimal, getFarmers, getProcessingUnits } from '../services/api';
+import { createAnimal, updateAnimal, deleteAnimal, getAbbatoirs, getProcessingUnits } from '../services/api';
 import api from '../services/api';
 
 interface Animal {
@@ -14,8 +14,8 @@ interface Animal {
     gender?: string;
     live_weight: number;
     notes?: string;
-    farmer: number;
-    farmer_name: string;
+    abbatoir: number;
+    abbatoir_name: string;
     transferred_to?: number;
     processing_unit_name: string | null;
     slaughtered: boolean;
@@ -27,7 +27,7 @@ interface Animal {
     created_at: string;
 }
 
-interface Farmer {
+interface Abbatoir {
     id: number;
     username: string;
     email: string;
@@ -45,7 +45,7 @@ interface ProcessingUnit {
 }
 
 interface AnimalFormData {
-    farmer_id: number | '';
+    abbatoir_id: number | '';
     species: string;
     animal_name: string;
     age: number | '';
@@ -85,13 +85,13 @@ function AdminAnimals() {
     const [formError, setFormError] = useState<string | null>(null);
 
     // Dropdown data
-    const [farmers, setFarmers] = useState<Farmer[]>([]);
+    const [abbatoirs, setAbbatoirs] = useState<Abbatoir[]>([]);
     const [processingUnits, setProcessingUnits] = useState<ProcessingUnit[]>([]);
     const [loadingDropdowns, setLoadingDropdowns] = useState(false);
 
     // Form data
     const [formData, setFormData] = useState<AnimalFormData>({
-        farmer_id: '',
+        abbatoir_id: '',
         species: 'cow',
         animal_name: '',
         age: '',
@@ -132,11 +132,11 @@ function AdminAnimals() {
     const loadDropdownData = async () => {
         setLoadingDropdowns(true);
         try {
-            const [farmersRes, puRes] = await Promise.all([
-                getFarmers(),
+            const [abbatoirsRes, puRes] = await Promise.all([
+                getAbbatoirs(),
                 getProcessingUnits()
             ]);
-            setFarmers(farmersRes.data.results || farmersRes.data || []);
+            setAbbatoirs(abbatoirsRes.data.results || abbatoirsRes.data || []);
             setProcessingUnits(puRes.data.results || puRes.data || []);
         } catch (err) {
             console.error('Error loading dropdown data:', err);
@@ -148,7 +148,7 @@ function AdminAnimals() {
     const handleOpenAddModal = () => {
         setEditingAnimal(null);
         setFormData({
-            farmer_id: '',
+            abbatoir_id: '',
             species: 'cow',
             animal_name: '',
             age: '',
@@ -166,7 +166,7 @@ function AdminAnimals() {
     const handleOpenEditModal = (animal: Animal) => {
         setEditingAnimal(animal);
         setFormData({
-            farmer_id: animal.farmer || '',
+            abbatoir_id: animal.abbatoir || '',
             species: animal.species || 'cow',
             animal_name: animal.animal_name || '',
             age: animal.age || '',
@@ -205,7 +205,7 @@ function AdminAnimals() {
         setFormError(null);
 
         // Validation
-        if (!formData.farmer_id) {
+        if (!formData.abbatoir_id) {
             setFormError('Please select an abattoir.');
             return;
         }
@@ -218,7 +218,7 @@ function AdminAnimals() {
         try {
             const payload = {
                 ...formData,
-                farmer_id: Number(formData.farmer_id),
+                abbatoir_id: Number(formData.abbatoir_id),
                 processing_unit_id: formData.processing_unit_id ? Number(formData.processing_unit_id) : null,
             };
 
@@ -277,7 +277,7 @@ function AdminAnimals() {
     const filteredAnimals = animals.filter(animal =>
         animal.animal_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         animal.animal_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        animal.farmer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        animal.abbatoir_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         animal.species?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -507,8 +507,8 @@ function AdminAnimals() {
                                                     <span title="Has appeals" style={{ marginLeft: '4px' }}>📝</span>
                                                 )}
                                             </td>
-                                            <td>{animal.farmer_name || 'N/A'}</td>
-                                            <td>{animal.processing_unit_name || 'At Farm'}</td>
+                                            <td>{animal.abbatoir_name || 'N/A'}</td>
+                                            <td>{animal.processing_unit_name || 'At Abbatoir'}</td>
                                             <td>{formatDate(animal.created_at)}</td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -593,23 +593,23 @@ function AdminAnimals() {
 
                             <form onSubmit={handleSubmit}>
                                 <div style={{ display: 'grid', gap: '16px' }}>
-                                    {/* Farmer Selection */}
+                                    {/* Abbatoir Selection */}
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
                                             Abattoir <span style={{ color: 'red' }}>*</span>
                                         </label>
                                         <select
-                                            name="farmer_id"
-                                            value={formData.farmer_id}
+                                            name="abbatoir_id"
+                                            value={formData.abbatoir_id}
                                             onChange={handleInputChange}
                                             required
                                             disabled={loadingDropdowns}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                         >
                                             <option value="">Select an abattoir...</option>
-                                            {farmers.map(farmer => (
-                                                <option key={farmer.id} value={farmer.id}>
-                                                    {farmer.full_name} ({farmer.username}) - {farmer.animal_count} animals
+                                            {abbatoirs.map(abbatoir => (
+                                                <option key={abbatoir.id} value={abbatoir.id}>
+                                                    {abbatoir.full_name} ({abbatoir.username}) - {abbatoir.animal_count} animals
                                                 </option>
                                             ))}
                                         </select>
@@ -703,7 +703,7 @@ function AdminAnimals() {
                                             disabled={loadingDropdowns}
                                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                         >
-                                            <option value="">At Farm (not transferred)</option>
+                                            <option value="">At Abbatoir (not transferred)</option>
                                             {processingUnits.map(pu => (
                                                 <option key={pu.id} value={pu.id}>
                                                     {pu.name} - {pu.location}

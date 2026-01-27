@@ -159,8 +159,8 @@ export const createSlaughterPart = (data: any) => api.post('/admin/slaughter-par
 export const updateSlaughterPart = (id: number | string, data: any) => api.put(`/admin/slaughter-parts/${id}/`, data);
 export const deleteSlaughterPart = (id: number | string) => api.delete(`/admin/slaughter-parts/${id}/`);
 
-// Farmers API (for selection dropdowns)
-export const getFarmers = () => api.get('/admin/farmers/');
+// Abbatoirs API (for selection dropdowns)
+export const getAbbatoirs = () => api.get('/admin/abbatoirs/');
 
 // Compliance & Certifications APIs
 export const getComplianceAudits = () => api.get('/admin/compliance/');

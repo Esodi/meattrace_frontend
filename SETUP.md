@@ -69,7 +69,7 @@ After successful login, you should see:
   - Create new users
   - Edit existing users
   - Delete users
-  - Assign roles (Farmer, Processor, Shop Owner, Admin)
+  - Assign roles (Abbatoir, Processor, Shop Owner, Admin)
 
 - **Processing Units Page**: Manage meat processing facilities
   - Add new processing units

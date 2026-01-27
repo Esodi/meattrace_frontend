@@ -1,13 +1,13 @@
 /**
  * Translation service for converting backend terminology to frontend display terms.
- * This allows the backend to use "Farmer" while the UI displays "Abattoir".
+ * This allows the backend to use "Abbatoir" while the UI displays "Abattoir".
  */
 
 // Mapping of backend terms to frontend display terms
 const termTranslations: Record<string, string> = {
-    'Farmer': 'Abattoir',
-    'farmer': 'abattoir',
-    'FARMER': 'ABATTOIR',
+    'Abbatoir': 'Abattoir',
+    'abbatoir': 'abattoir',
+    'ABBATOIR': 'ABATTOIR',
 };
 
 /**
@@ -33,7 +33,7 @@ export function translateRole(role: string | null | undefined): string {
 
     // Handle case-insensitive matching while preserving original case style
     const lowerRole = role.toLowerCase();
-    if (lowerRole === 'farmer') {
+    if (lowerRole === 'abbatoir') {
         // Preserve the original case style
         if (role === role.toUpperCase()) return 'ABATTOIR';
         if (role[0] === role[0].toUpperCase()) return 'Abattoir';

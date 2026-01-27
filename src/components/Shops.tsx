@@ -300,7 +300,7 @@ function Shops() {
                   </td>
                   <td><span className="license-badge">{(shop as any).business_license || 'N/A'}</span></td>
                   <td>
-                    <span className={`role-badge ${(shop as any).is_active !== false ? 'role-admin' : 'role-farmer'}`}>
+                    <span className={`role-badge ${(shop as any).is_active !== false ? 'role-admin' : 'role-abbatoir'}`}>
                       {(shop as any).is_active !== false ? 'Active' : 'Inactive'}
                     </span>
                   </td>

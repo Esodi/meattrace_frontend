@@ -164,7 +164,7 @@ User
 ├── last_name
 ├── is_active
 └── UserProfile
-    └── role (Farmer, Processor, ShopOwner, Admin)
+    └── role (Abbatoir, Processor, ShopOwner, Admin)
 
 ProcessingUnit
 ├── id (PK)
@@ -195,7 +195,7 @@ Animal, Product, Order, Sale (tracked for statistics)
 ```json
 {
   "total_users": 45,
-  "total_farmers": 20,
+  "total_abbatoirs": 20,
   "total_processors": 10,
   "total_shop_owners": 12,
   "total_admins": 3,
@@ -221,11 +221,11 @@ Animal, Product, Order, Sale (tracked for statistics)
   "results": [
     {
       "id": 1,
-      "username": "john_farmer",
+      "username": "john_abbatoir",
       "email": "john@example.com",
       "first_name": "John",
       "last_name": "Doe",
-      "role": "farmer",
+      "role": "abbatoir",
       "is_active": true
     },
     ...

@@ -30,7 +30,7 @@ function UserManagement() {
     password: '',
     first_name: '',
     last_name: '',
-    role: 'Farmer',
+    role: 'Abbatoir',
     phone: '',
     address: '',
     processing_unit_id: '' as number | '',
@@ -144,7 +144,7 @@ function UserManagement() {
       password: '', // Don't populate password for editing
       first_name: user.first_name || '',
       last_name: user.last_name || '',
-      role: user.profile_role || user.role || 'Farmer',
+      role: user.profile_role || user.role || 'Abbatoir',
       phone: (user as any).profile_phone || '',
       address: (user as any).profile_address || '',
       processing_unit_id: (user as any).profile_processing_unit_id || '',
@@ -179,7 +179,7 @@ function UserManagement() {
       password: '',
       first_name: '',
       last_name: '',
-      role: 'Farmer',
+      role: 'Abbatoir',
       phone: '',
       address: '',
       processing_unit_id: '',
@@ -302,7 +302,7 @@ function UserManagement() {
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="Farmer">Abattoir</option>
+                    <option value="Abbatoir">Abattoir</option>
                     <option value="Processor">Processor</option>
                     <option value="ShopOwner">Shop Owner</option>
                     <option value="Admin">Admin</option>
@@ -480,13 +480,13 @@ function UserManagement() {
                         <span className="entity-name">{user.profile_shop || 'Unassigned'}</span>
                       </div>
                     )}
-                    {user.profile_role === 'Farmer' && (
+                    {user.profile_role === 'Abbatoir' && (
                       <div className="entity-link">
                         <span className="entity-icon" style={{ marginRight: '8px' }}>🌾</span>
                         <span className="entity-name">Abattoir</span>
                       </div>
                     )}
-                    {!['Processor', 'ShopOwner', 'Farmer'].includes(user.profile_role || user.role) && (
+                    {!['Processor', 'ShopOwner', 'Abbatoir'].includes(user.profile_role || user.role) && (
                       <span className="text-muted">-</span>
                     )}
                   </td>
