@@ -221,6 +221,9 @@ const CustomReports: React.FC = () => {
                         >
                             <option value="">All Abbatoirs</option>
                             {entities.abbatoirs.map(abbatoir => (
+                            <option value="">All Farmers</option>
+                            {entities.farmers.map(abbatoir => (
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
                                 <option key={abbatoir.id} value={abbatoir.id}>{abbatoir.username}</option>
                             ))}
                         </select>

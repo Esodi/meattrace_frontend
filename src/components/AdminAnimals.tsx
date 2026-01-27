@@ -16,6 +16,8 @@ interface Animal {
     notes?: string;
     abbatoir: number;
     abbatoir_name: string;
+    farmer_name: string;
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
     transferred_to?: number;
     processing_unit_name: string | null;
     slaughtered: boolean;
@@ -86,6 +88,8 @@ function AdminAnimals() {
 
     // Dropdown data
     const [abbatoirs, setAbbatoirs] = useState<Abbatoir[]>([]);
+    const [farmers, setFarmers] = useState<Abbatoir[]>([]);
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
     const [processingUnits, setProcessingUnits] = useState<ProcessingUnit[]>([]);
     const [loadingDropdowns, setLoadingDropdowns] = useState(false);
 
@@ -167,6 +171,8 @@ function AdminAnimals() {
         setEditingAnimal(animal);
         setFormData({
             abbatoir_id: animal.abbatoir || '',
+            farmer_id: animal.abbatoir || '',
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
             species: animal.species || 'cow',
             animal_name: animal.animal_name || '',
             age: animal.age || '',
@@ -508,6 +514,8 @@ function AdminAnimals() {
                                                 )}
                                             </td>
                                             <td>{animal.abbatoir_name || 'N/A'}</td>
+                                            <td>{animal.farmer_name || 'N/A'}</td>
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
                                             <td>{animal.processing_unit_name || 'At Abbatoir'}</td>
                                             <td>{formatDate(animal.created_at)}</td>
                                             <td>
@@ -608,6 +616,8 @@ function AdminAnimals() {
                                         >
                                             <option value="">Select an abattoir...</option>
                                             {abbatoirs.map(abbatoir => (
+                                            {farmers.map(abbatoir => (
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
                                                 <option key={abbatoir.id} value={abbatoir.id}>
                                                     {abbatoir.full_name} ({abbatoir.username}) - {abbatoir.animal_count} animals
                                                 </option>

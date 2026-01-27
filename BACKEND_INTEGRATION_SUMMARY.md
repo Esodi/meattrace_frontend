@@ -6,6 +6,8 @@
 All hardcoded test data has been removed from the following components:
 - **Dashboard.js**: Removed mock statistics (45 users, 12 units, 28 shops, etc.)
 - **UserManagement.js**: Removed 3 mock users (john_abbatoir, mary_processor, bob_shop)
+- **UserManagement.js**: Removed 3 mock users (john_farmer, mary_processor, bob_shop)
+>>>>>>> a079d2c (Update frontend with recent dashboard and traceability enhancements)
 - **ProcessingUnits.js**: Removed 2 mock processing units (City Meat Processing, Abbatoir Fresh Processors)
 - **Shops.js**: Removed 2 mock shops (Fresh Meat Market, Quality Butchers)
 
