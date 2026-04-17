@@ -67,7 +67,14 @@ api.interceptors.response.use(
   }
 );
 
-// Dashboard APIs
+// ─── Shared param helper ────────────────────────────────────────────────────
+// Strips empty-string, null, and undefined values so they never reach the URL.
+const buildParams = (params: Record<string, any>): Record<string, any> =>
+  Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+  );
+
+// ─── Dashboard APIs ──────────────────────────────────────────────────────────
 export const getDashboardStats = () => api.get('/admin/dashboard/stats/');
 
 // User Management APIs
@@ -181,5 +188,97 @@ export const rejectApplication = (id: number | string, reason: string) => api.po
 export const getApprovalWorkflows = () => api.get('/admin/workflows/');
 export const createApprovalWorkflow = (data: any) => api.post('/admin/workflows/', data);
 export const updateApprovalWorkflow = (id: number | string, data: any) => api.put(`/admin/workflows/${id}/`, data);
+
+// ─── Report API Functions ────────────────────────────────────────────────────
+//
+// Each function maps directly to one of the 8 business reports.  Params are
+// typed as Record<string,any> so callers can pass any subset of filter keys;
+// buildParams() strips blank/null values before they hit the URL.
+
+/**
+ * Report 1 — Sales per Shop
+ * Endpoint: GET /sales/
+ * Supported params: shop_id, start_date, end_date, payment_method
+ * Response: paginated { count, results: Sale[] } or Sale[]
+ */
+export const getSalesReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/sales/', { params: buildParams(params), signal });
+
+/**
+ * Report 2 — Product Production Report
+ * Endpoint: GET /admin/products/
+ * Supported params: processing_unit_id, start_date, end_date, product_type, category
+ */
+export const getProductionReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/products/', { params: buildParams(params), signal });
+
+/**
+ * Report 3 — Product Issue Report
+ * Endpoint: GET /admin/products/ (client-side filter: transferred_to IS NOT NULL)
+ * Also fetches GET /receipts/ in parallel for received-weight reconciliation.
+ * Supported params: processing_unit_id, shop_id, start_date, end_date
+ */
+export const getProductIssueReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/products/', { params: buildParams(params), signal });
+
+/**
+ * Report 4 — Animals Report
+ * Endpoint: GET /admin/animals/
+ * Supported params: species, slaughtered, abbatoir_id, start_date, end_date
+ * Note: lifecycle_status is a computed property — filtered client-side.
+ */
+export const getAnimalsReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/animals/', { params: buildParams(params), signal });
+
+/**
+ * Report 5 — Slaughter Parts Report
+ * Endpoint: GET /admin/slaughter-parts/
+ * Supported params: part_type, processing_unit_id, start_date, end_date
+ */
+export const getSlaughterPartsReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/slaughter-parts/', { params: buildParams(params), signal });
+
+/**
+ * Report 6 — Product Stock (Shop)
+ * Endpoint: GET /inventory/
+ * NOTE: InventoryViewSet is not yet implemented on the backend (returns 404).
+ *       The caller must catch 404 and display a backend-config error.
+ * Supported params: shop_id
+ */
+export const getShopStockReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/inventory/', { params: buildParams(params), signal });
+
+/**
+ * Report 7 — Product Stock (Container / In-Transit)
+ * Endpoint: GET /admin/products/
+ * Client-side filter: transferred_to IS NOT NULL AND received_at IS NULL
+ * Supported params: processing_unit_id, shop_id, start_date, end_date
+ */
+export const getInTransitStockReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/products/', { params: buildParams(params), signal });
+
+/**
+ * Report 8 — Product Stock (Processing Unit)
+ * Endpoint: GET /admin/products/
+ * Supported params: processing_unit_id, start_date, end_date, product_type
+ */
+export const getPUStockReport = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/admin/products/', { params: buildParams(params), signal });
+
+// ─── Supporting endpoints used by multiple reports ───────────────────────────
+
+/**
+ * Fetch receipt records for a shop (used in Product Issue reconciliation).
+ * Endpoint: GET /receipts/
+ * Supported params: shop_id, start_date, end_date
+ */
+export const getReceiptsList = (params: Record<string, any>, signal?: AbortSignal) =>
+  api.get('/receipts/', { params: buildParams(params), signal });
+
+/**
+ * Fetch all product categories (used as a filter option in production report).
+ * Endpoint: GET /product-categories/
+ */
+export const getProductCategories = () => api.get('/product-categories/');
 
 export default api;
