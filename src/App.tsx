@@ -17,6 +17,7 @@ import SupplyChainMonitor from './components/SupplyChainMonitor';
 import ApprovalWorkflows from './components/ApprovalWorkflows';
 import GovernmentReports from './components/GovernmentReports';
 import CustomReports from './components/CustomReports';
+import WasteDashboard from './components/WasteDashboard';
 import Navigation from './components/Navigation';
 
 import { User } from './types';
@@ -80,6 +81,7 @@ function App() {
             <Route path="/certifications" element={<Certifications />} />
             <Route path="/supply-chain" element={<SupplyChainMonitor />} />
             <Route path="/approvals" element={<ApprovalWorkflows />} />
+            <Route path="/waste" element={<WasteDashboard />} />
             <Route path="/reports" element={<GovernmentReports />} />
             <Route path="/reports/custom" element={<CustomReports />} />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MdDashboard, MdPeople, MdFactory, MdStorefront, MdLogout, MdAccountCircle, MdPets, MdInventory, MdAssignment, MdVerified, MdMap, MdPendingActions, MdTrendingUp, MdMenu, MdClose, MdContentCut, MdAssessment } from 'react-icons/md';
+import { MdDashboard, MdPeople, MdFactory, MdStorefront, MdLogout, MdAccountCircle, MdPets, MdInventory, MdAssignment, MdVerified, MdMap, MdPendingActions, MdTrendingUp, MdMenu, MdClose, MdContentCut, MdAssessment, MdDeleteSweep } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Navigation.css';
 
@@ -122,6 +122,12 @@ function Navigation({ user, onLogout }: NavigationProps) {
             <Link to="/slaughter-parts" onClick={closeMobileMenu}>
               <span className="icon"><MdContentCut /></span>
               Slaughter Parts
+            </Link>
+          </li>
+          <li className={location.pathname === '/waste' ? 'active' : ''}>
+            <Link to="/waste" onClick={closeMobileMenu}>
+              <span className="icon"><MdDeleteSweep /></span>
+              Waste Tracking
             </Link>
           </li>
 

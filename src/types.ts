@@ -209,6 +209,34 @@ export interface AnimalReport {
     created_at: string;
 }
 
+// ─── Waste Tracking ─────────────────────────────────────────────────────────
+
+export interface Waste {
+    id: number;
+    animal?: number;
+    animal_id_tag?: string;
+    slaughter_part?: number;
+    slaughter_part_type?: string;
+    product?: number;
+    product_name?: string;
+    waste_type: 'evisceration' | 'processing' | 'rejection' | 'trimming' | 'spoilage' | 'other';
+    stage: 'abbatoir' | 'processing_unit' | 'shop';
+    weight_kg: number;
+    expected_weight_kg?: number;
+    actual_weight_kg?: number;
+    auto_generated: boolean;
+    notes?: string;
+    recorded_by?: number;
+    recorded_by_name?: string;
+    abbatoir?: number;
+    abbatoir_name?: string;
+    processing_unit?: number;
+    processing_unit_name?: string;
+    shop?: number;
+    shop_name?: string;
+    created_at: string;
+}
+
 // ─── Slaughter Parts Report (Report 5) ───────────────────────────────────────
 
 export interface SlaughterPartReport {
