@@ -20,7 +20,6 @@ import type {
 } from '../types';
 import ReportTable, { type ReportColumn } from './ReportTable';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import './reports.css';
 
 // ─── Utility functions ────────────────────────────────────────────────────────
@@ -1356,37 +1355,140 @@ const CustomReports: React.FC = () => {
 
     const doExportExcel = useCallback(() => {
         if (!reportData.length) return;
+        const def      = REPORT_DEFS.find(d => d.id === activeReport);
+        const title    = def?.label ?? activeReport;
+        const dateStr  = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
         const wsData = [
-            activeCols.map(c => c.label),
+            [`MeatTrace — ${title}`],
+            [`Exported: ${dateStr}`, '', `Total records: ${reportData.length}`],
+            [],                                          // blank separator row
+            activeCols.map(c => c.label),               // column headers
             ...reportData.map(row =>
                 activeCols.map(c => c.csvValue ? c.csvValue(row) : String((row as any)[c.key] ?? ''))
             ),
         ];
+
         const ws  = XLSX.utils.aoa_to_sheet(wsData);
-        const wb  = XLSX.utils.book_new();
-        const def = REPORT_DEFS.find(d => d.id === activeReport);
+
+        // Merge title across all columns
+        ws['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: activeCols.length - 1 } },
+        ];
+
+        // Column widths — auto-size based on header length
+        ws['!cols'] = activeCols.map(c => ({ wch: Math.max(c.label.length + 4, 14) }));
+
+        const wb = XLSX.utils.book_new();
         // Excel sheet names may not contain: : \ / ? * [ ]  and max 31 chars
-        const sheetName = (def?.label ?? 'Report')
-            .replace(/[:/\\?*[\]]/g, '-')
-            .slice(0, 31);
+        const sheetName = title.replace(/[:/\\?*[\]]/g, '-').slice(0, 31);
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
         XLSX.writeFile(wb, `meattrace_${activeReport}_${new Date().toISOString().split('T')[0]}.xlsx`);
     }, [reportData, activeCols, activeReport]);
 
     const doExportPDF = useCallback(async () => {
-        if (!reportRef.current || exporting) return;
+        if (!reportData.length || exporting) return;
         setExporting(true);
         try {
-            const canvas  = await html2canvas(reportRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf     = new jsPDF('l', 'mm', 'a4');
-            const pdfW    = pdf.internal.pageSize.getWidth();
-            const pdfH    = (canvas.height * pdfW) / canvas.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+            const def      = REPORT_DEFS.find(d => d.id === activeReport);
+            const title    = def?.label ?? activeReport;
+            const dateStr  = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            const pdf      = new jsPDF('l', 'mm', 'a4');
+            const pageW    = pdf.internal.pageSize.getWidth();
+            const pageH    = pdf.internal.pageSize.getHeight();
+            const margin   = 14;
+            const colCount = activeCols.length;
+
+            // ── Header bar ──────────────────────────────────────────────────
+            pdf.setFillColor(30, 80, 50);
+            pdf.rect(0, 0, pageW, 22, 'F');
+
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(14);
+            pdf.text('MeatTrace', margin, 14);
+
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.text(`Exported: ${dateStr}`, pageW - margin, 14, { align: 'right' });
+
+            // ── Report title ─────────────────────────────────────────────────
+            pdf.setTextColor(30, 80, 50);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(13);
+            pdf.text(title, margin, 34);
+
+            pdf.setDrawColor(30, 80, 50);
+            pdf.setLineWidth(0.5);
+            pdf.line(margin, 37, pageW - margin, 37);
+
+            // ── Table ────────────────────────────────────────────────────────
+            const usableW    = pageW - margin * 2;
+            const colW       = usableW / colCount;
+            const rowH       = 8;
+            const headerY    = 42;
+            const firstRowY  = headerY + rowH;
+
+            // Table header
+            pdf.setFillColor(30, 80, 50);
+            pdf.rect(margin, headerY, usableW, rowH, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(7);
+            activeCols.forEach((col, i) => {
+                pdf.text(col.label, margin + i * colW + 2, headerY + 5.5, { maxWidth: colW - 4 });
+            });
+
+            // Table rows
+            pdf.setFont('helvetica', 'normal');
+            let y = firstRowY;
+            reportData.forEach((row, rowIdx) => {
+                if (y + rowH > pageH - 12) {
+                    pdf.addPage();
+                    // Repeat header on new page
+                    pdf.setFillColor(30, 80, 50);
+                    pdf.rect(margin, 10, usableW, rowH, 'F');
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFont('helvetica', 'bold');
+                    activeCols.forEach((col, i) => {
+                        pdf.text(col.label, margin + i * colW + 2, 10 + 5.5, { maxWidth: colW - 4 });
+                    });
+                    pdf.setFont('helvetica', 'normal');
+                    y = 10 + rowH;
+                }
+                // Alternating row background
+                if (rowIdx % 2 === 0) {
+                    pdf.setFillColor(245, 248, 245);
+                    pdf.rect(margin, y, usableW, rowH, 'F');
+                }
+                pdf.setTextColor(30, 30, 30);
+                pdf.setFontSize(7);
+                activeCols.forEach((col, i) => {
+                    const val = col.csvValue ? col.csvValue(row as any) : String((row as any)[col.key] ?? '');
+                    pdf.text(val, margin + i * colW + 2, y + 5.5, { maxWidth: colW - 4 });
+                });
+                // Row border
+                pdf.setDrawColor(210, 220, 210);
+                pdf.setLineWidth(0.2);
+                pdf.line(margin, y + rowH, margin + usableW, y + rowH);
+                y += rowH;
+            });
+
+            // ── Footer ───────────────────────────────────────────────────────
+            const totalPages = (pdf as any).internal.getNumberOfPages();
+            for (let p = 1; p <= totalPages; p++) {
+                pdf.setPage(p);
+                pdf.setTextColor(120, 120, 120);
+                pdf.setFontSize(7);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(`Page ${p} of ${totalPages}  |  MeatTrace — ${title}`, margin, pageH - 5);
+                pdf.text(`Total records: ${reportData.length}`, pageW - margin, pageH - 5, { align: 'right' });
+            }
+
             pdf.save(`meattrace_${activeReport}_${new Date().toISOString().split('T')[0]}.pdf`);
-        } catch { /* silent */ }
+        } catch (err) { console.error('PDF export failed', err); }
         finally { setExporting(false); }
-    }, [reportRef, exporting, activeReport]);
+    }, [reportData, activeCols, activeReport, exporting]);
 
     const handleExportConfirm = useCallback((fmt: ExportFormat) => {
         if (fmt === 'csv')   doExportCSV();
