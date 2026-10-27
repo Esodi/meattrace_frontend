@@ -35,3 +35,8 @@ yarn-error.log*
 
 # OS
 Thumbs.db
+
+# local server details for deploy-admin.sh
+/deploy-admin.local.env
+/.deploy_dist
+/.admin_dist_*.tgz

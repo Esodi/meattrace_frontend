@@ -19,7 +19,13 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging",
     "build": "tsc && vite build",
+    "build:staging": "tsc && vite build --mode staging",
+    "dev:demo": "vite --mode demo",
+    "build:demo": "tsc && vite build --mode demo",
+    "dev:dev": "vite --mode dev",
+    "build:dev": "tsc && vite build --mode dev",
     "preview": "vite preview"
   },
   "devDependencies": {
